@@ -1,4 +1,4 @@
-name: organizations/321880981428/customConstraints/custom.requireApplicationLabel1
+name: organizations/321880981428/customConstraints/custom.requireApplicationLabels
 resourceTypes:
 - compute.googleapis.com/Instance
 methodTypes:

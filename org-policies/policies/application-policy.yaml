@@ -1,4 +1,4 @@
-name: organizations/321880981428/policies/custom.requireApplicationLabel1
+name: organizations/321880981428/policies/custom.requireApplicationLabels
 
 spec:
   rules:

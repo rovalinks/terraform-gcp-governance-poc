@@ -1,4 +1,4 @@
-name: organizations/321880981428/policies/custom.requireOwnerLabel1
+name: organizations/321880981428/policies/custom.requiredOwnerLabels
 
 spec:
   rules:
