@@ -1,0 +1,9 @@
+name: organizations/321880981428/customConstraints/custom.requireEnvironmentLabel1
+resourceTypes:
+- compute.googleapis.com/Instance
+methodTypes:
+- CREATE
+condition: "!('environment' in resource.labels)"
+actionType: DENY
+displayName: Require Environment Label
+description: Deny VM creation because the required label 'environment' is missing.

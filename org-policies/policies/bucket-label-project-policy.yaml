@@ -1,0 +1,7 @@
+# org-policies/policies/bucket-label-project-policy.yaml
+
+name: projects/106228803995/policies/custom.requireBucketLabels
+
+spec:
+  rules:
+    - enforce: true

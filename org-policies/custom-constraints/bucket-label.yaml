@@ -1,0 +1,13 @@
+name: organizations/321880981428/customConstraints/custom.requireBucketLabels
+resourceTypes:
+  - storage.googleapis.com/Bucket
+methodTypes:
+  - CREATE
+  - UPDATE
+condition: |
+  !(resource.labels.exists(l, l == "application") &&
+    resource.labels.exists(l, l == "environment") &&
+    resource.labels.exists(l, l == "owner"))
+actionType: DENY
+displayName: Require mandatory bucket labels
+description: Deny bucket creation or update if mandatory labels are missing.

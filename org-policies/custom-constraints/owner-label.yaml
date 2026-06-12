@@ -1,0 +1,9 @@
+name: organizations/321880981428/customConstraints/custom.requireOwnerLabel1
+resourceTypes:
+- compute.googleapis.com/Instance
+methodTypes:
+- CREATE
+condition: "!('owner' in resource.labels)"
+actionType: DENY
+displayName: Require Owner Label
+description: Deny VM creation because the required label 'owner' is missing.

@@ -1,0 +1,14 @@
+variable "environment" {
+  description = "Environment name"
+  type        = string
+}
+
+variable "owner" {
+  description = "Resource owner"
+  type        = string
+}
+
+variable "application" {
+  description = "Application name"
+  type        = string
+}

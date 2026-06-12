@@ -1,0 +1,9 @@
+name: organizations/321880981428/customConstraints/custom.requireBucketEnvironmentLabel
+resourceTypes:
+- storage.googleapis.com/Bucket
+methodTypes:
+- CREATE
+condition: "!('environment' in resource.labels)"
+actionType: DENY
+displayName: Require Environment Label For Buckets
+description: Deny bucket creation if environment label is missing.

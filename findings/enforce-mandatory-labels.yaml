@@ -1,0 +1,5 @@
+name: organizations/321880981428/policies/custom.requireEnvironmentLabel
+
+spec:
+  rules:
+  - enforce: true

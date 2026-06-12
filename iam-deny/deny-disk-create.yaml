@@ -1,0 +1,6 @@
+rules:
+  - denyRule:
+      deniedPrincipals:
+        - "principalSet://goog/public:all"
+      deniedPermissions:
+        - "compute.googleapis.com/disks.create"
