@@ -1,0 +1,17 @@
+application_analytics = "tagValues/281475223519650"
+application_crm = "tagValues/281480322380749"
+application_ecommerce = "tagValues/281477930450232"
+application_payments = "tagValues/281484425365550"
+application_tag_key = "tagKeys/281479371383162"
+
+environment_dev = "tagValues/281481837036535"
+environment_prod = "tagValues/281477935936563"
+environment_tag_key = "tagKeys/281477968489837"
+environment_test = "tagValues/281476234994622"
+environment_uat = "tagValues/281480390749157"
+
+owner_cloud_team = "tagValues/281483093721712"
+owner_networking_team = "tagValues/281483093920970"
+owner_platform_team = "tagValues/281476571583996"
+owner_security_team = "tagValues/281482234993681"
+owner_tag_key = "tagKeys/281483047088327"
