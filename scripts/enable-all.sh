@@ -62,16 +62,16 @@ create_deny_policy() {
 }
 
 create_deny_policy \
-    "deny-vm-create" \
-    "iam-deny/deny-vm-create.yaml"
+    "deny-vm-governance" \
+    "iam-deny/deny-vm-governance.yaml"
 
 create_deny_policy \
-    "deny-disk-create" \
-    "iam-deny/deny-disk-create.yaml"
+    "deny-disk-governance" \
+    "iam-deny/deny-disk-governance.yaml"
 
 create_deny_policy \
-    "deny-snapshot-create" \
-    "iam-deny/deny-snapshot-create.yaml"
+    "deny-snapshot-governance" \
+    "iam-deny/deny-snapshot-governance.yaml"
 
 echo ""
 echo "======================================"
@@ -81,21 +81,21 @@ echo "======================================"
 echo ""
 echo "Enabled Controls:"
 echo "  ✓ Custom Constraints"
-echo "      - requireEnvironmentLabel1"
-echo "      - requireApplicationLabel1"
-echo "      - requireOwnerLabel1"
+echo "      - requireEnvironmentLabels"
+echo "      - requireApplicationLabels"
+echo "      - requireOwnerLabels"
 
 echo ""
 echo "  ✓ Org Policies"
-echo "      - custom.requireEnvironmentLabel1"
-echo "      - custom.requireApplicationLabel1"
+echo "      - custom.requireEnvironmentLabels"
+echo "      - custom.requireApplicationLabels"
 echo "      - custom.requireOwnerLabel1"
 
 echo ""
 echo "  ✓ IAM Deny Policies"
-echo "      - deny-vm-create"
-echo "      - deny-disk-create"
-echo "      - deny-snapshot-create"
+echo "      - deny-vm-governance"
+echo "      - deny-disk-governance"
+echo "      - deny-snapshot-governance"
 
 echo ""
 echo "Verify using:"

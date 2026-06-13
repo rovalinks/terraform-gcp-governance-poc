@@ -2,5 +2,10 @@ rules:
   - denyRule:
       deniedPrincipals:
         - "principalSet://goog/public:all"
+
+      exceptionPrincipals:
+        - "principal://goog/subject/rohith555raju@gmail.com"
+
       deniedPermissions:
         - "compute.googleapis.com/disks.create"
+        - "compute.googleapis.com/disks.setLabels"

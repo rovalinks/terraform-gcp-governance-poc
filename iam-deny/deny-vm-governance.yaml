@@ -1,0 +1,12 @@
+rules:
+  - denyRule:
+      deniedPrincipals:
+        - "principalSet://goog/public:all"
+
+      exceptionPrincipals:
+        - "principal://goog/subject/rohith555raju@gmail.com"
+
+      deniedPermissions:
+        - "compute.googleapis.com/instances.create"
+        - "compute.googleapis.com/instances.setLabels"
+        - "compute.googleapis.com/instances.createTagBinding"

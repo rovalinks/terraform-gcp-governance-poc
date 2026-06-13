@@ -25,9 +25,9 @@ delete_deny_policy() {
         || echo "✓ ${POLICY_ID} not found. Skipping."
 }
 
-delete_deny_policy "deny-vm-create"
-delete_deny_policy "deny-disk-create"
-delete_deny_policy "deny-snapshot-create"
+delete_deny_policy "deny-vm-governance"
+delete_deny_policy "deny-disk-governance"
+delete_deny_policy "deny-snapshot-governance"
 
 echo ""
 echo "======================================"
@@ -46,9 +46,9 @@ disable_policy() {
         || echo "✓ ${POLICY_NAME} not found. Skipping."
 }
 
-disable_policy "custom.requireEnvironmentLabel1"
-disable_policy "custom.requireApplicationLabel1"
-disable_policy "custom.requireOwnerLabel1"
+disable_policy "custom.requireEnvironmentLabels"
+disable_policy "custom.requireApplicationLabels"
+disable_policy "custom.requireOwnerLabels"
 
 echo ""
 echo "======================================"
