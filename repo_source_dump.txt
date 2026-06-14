@@ -1,0 +1,1681 @@
+===== FILE: ./org-policies/policies/owner-policy.yaml =====
+name: organizations/321880981428/policies/custom.requiredOwnerLabels
+
+spec:
+  rules:
+  - enforce: true
+
+===== FILE: ./org-policies/policies/bucket-label-policy.yaml =====
+name: organizations/321880981428/policies/custom.requireBucketLabels
+
+spec:
+  rules:
+    - enforce: true
+
+===== FILE: ./org-policies/policies/application-policy.yaml =====
+name: organizations/321880981428/policies/custom.requireApplicationLabels
+
+spec:
+  rules:
+  - enforce: true
+
+===== FILE: ./org-policies/policies/bucket-label-project-policy.yaml =====
+# org-policies/policies/bucket-label-project-policy.yaml
+
+name: projects/106228803995/policies/custom.requireBucketLabels
+
+spec:
+  rules:
+    - enforce: true
+
+===== FILE: ./org-policies/policies/environment-policy.yaml =====
+name: organizations/321880981428/policies/custom.requireEnvironmentLabels
+
+spec:
+  rules:
+  - enforce: true
+
+===== FILE: ./org-policies/custom-constraints/owner-label.yaml =====
+name: organizations/321880981428/customConstraints/custom.requiredOwnerLabels
+resourceTypes:
+- compute.googleapis.com/Instance
+methodTypes:
+- CREATE
+condition: "!('owner' in resource.labels)"
+actionType: DENY
+displayName: Require Owner Label
+description: Deny VM creation because the required label 'owner' is missing.
+
+===== FILE: ./org-policies/custom-constraints/application-label.yaml =====
+name: organizations/321880981428/customConstraints/custom.requireApplicationLabels
+resourceTypes:
+- compute.googleapis.com/Instance
+methodTypes:
+- CREATE
+condition: "!('application' in resource.labels)"
+actionType: DENY
+displayName: Require Application Label
+description: Deny VM creation because the required label 'application' is missing.
+
+===== FILE: ./org-policies/custom-constraints/bucket-label.yaml =====
+name: organizations/321880981428/customConstraints/custom.requireBucketLabels
+resourceTypes:
+  - storage.googleapis.com/Bucket
+methodTypes:
+  - CREATE
+  - UPDATE
+condition: |
+  !(resource.labels.exists(l, l == "application") &&
+    resource.labels.exists(l, l == "environment") &&
+    resource.labels.exists(l, l == "owner"))
+actionType: DENY
+displayName: Require mandatory bucket labels
+description: Deny bucket creation or update if mandatory labels are missing.
+
+===== FILE: ./org-policies/custom-constraints/environment-label.yaml =====
+name: organizations/321880981428/customConstraints/custom.requireEnvironmentLabels
+resourceTypes:
+- compute.googleapis.com/Instance
+methodTypes:
+- CREATE
+condition: "!('environment' in resource.labels)"
+actionType: DENY
+displayName: Require Environment Label
+description: Deny VM creation because the required label 'environment' is missing.
+
+===== FILE: ./terraform.sh =====
+#!/bin/bash
+
+echo "Select Environment:"
+echo "1) dev"
+echo "2) test"
+echo "3) uat"
+echo "4) prod"
+
+read -p "Enter choice [1-4]: " choice
+
+case $choice in
+    1)
+        ENV="dev"
+        ;;
+    2)
+        ENV="test"
+        ;;
+    3)  ENV="uat"
+        ;;
+    4)  ENV="prod"
+        ;;
+    *)
+        echo "Invalid selection."
+        exit 1
+        ;;
+esac
+
+cd terraform/environments/$ENV || exit 1
+
+echo ""
+echo "Selected environment: $ENV"
+echo ""
+
+terraform "$@"
+
+===== FILE: ./terraform/environments/test/test.auto.tfvars =====
+environment = "test"
+owner       = "kumar"
+application = "test-tagging"
+
+===== FILE: ./terraform/environments/prod/prod.auto.tfvars =====
+environment = "prod"
+owner       = "platform-team"
+application = "prod-tagging"
+
+===== FILE: ./terraform/environments/dev/tag-test.tf =====
+data "google_tags_tag_keys" "environment" {
+  parent = "organizations/321880981428"
+}
+
+===== FILE: ./terraform/environments/dev/main.tf =====
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 6.0"
+    }
+  }
+}
+
+provider "google" {
+  project = "project-a9c3b175-7f78-4ba6-9ad"
+  region  = "europe-west2"
+  zone    = "europe-west2-a"
+}
+
+module "compute_instance" {
+  source = "../../modules/compute-instance"
+
+  environment = var.environment
+  owner        = var.owner
+  application  = var.application
+ 
+  project_id   = "project-a9c3b175-7f78-4ba6-9ad"
+  region       = "europe-west2"
+  zone         = "europe-west2-a"
+}
+
+# module "vm_tag_bindings" {
+
+#  source = "../../modules/tag-bindings"
+
+#  depends_on = [
+#   module.compute_instance
+#  ]
+
+#  parent = format(
+#    "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
+#    "106228803995",
+#    "europe-west2-a",
+#    module.compute_instance.instance_id
+#  )
+
+#  location = "europe-west2-a"
+
+#  environment_tag_value = "tagValues/281481837036535"
+
+#  owner_tag_value = "tagValues/281476571583996"
+
+#  application_tag_value = "tagValues/281484425365550"
+#}
+
+module "compute_disk" {
+
+  source = "../../modules/compute-disk"
+
+  environment = var.environment
+  owner        = var.owner
+  application  = var.application
+
+  zone = "europe-west2-a"
+
+  size_gb = 10
+  type    = "pd-standard"
+}
+
+module "compute_snapshot" {
+
+  source = "../../modules/compute-snapshot"
+
+  source_disk      = "${var.environment}-tagging-disk-01"
+
+  depends_on = [
+    module.compute_disk
+  ]
+  
+  environment = var.environment
+  owner        = var.owner
+  application  = var.application
+
+}
+
+===== FILE: ./terraform/environments/dev/variables.tf =====
+variable "environment" {
+  description = "Deployment environment"
+  type        = string
+
+  validation {
+    condition = contains(
+      ["dev", "test", "uat", "prod"],
+      lower(var.environment)
+    )
+
+    error_message = "Environment must be one of: dev, test, uat, prod."
+  }
+}
+
+variable "owner" {
+  description = "Resource owner"
+  type        = string
+
+  validation {
+    condition     = length(trimspace(var.owner)) > 0
+    error_message = "Owner is mandatory."
+  }
+}
+
+variable "application" {
+  description = "Application name"
+  type        = string
+
+  validation {
+    condition     = length(trimspace(var.application)) > 0
+    error_message = "Application is mandatory."
+  }
+}
+
+===== FILE: ./terraform/environments/dev/dev.auto.tfvars =====
+environment = "dev"
+owner       = "dev-team"
+application = "payments"
+
+===== FILE: ./terraform/environments/dev/locals.tf =====
+locals {
+  mandatory_labels = {
+    environment = var.environment
+    owner       = var.owner
+    application = var.application
+  }
+}
+
+===== FILE: ./terraform/modules/tag-bindings/main.tf =====
+resource "google_tags_location_tag_binding" "environment" {
+
+  parent = var.parent
+
+  tag_value = var.environment_tag_value
+
+  location = var.location
+}
+
+resource "google_tags_location_tag_binding" "owner" {
+
+  parent = var.parent
+
+  tag_value = var.owner_tag_value
+
+  location = var.location
+}
+
+resource "google_tags_location_tag_binding" "application" {
+
+  parent = var.parent
+
+  tag_value = var.application_tag_value
+
+  location = var.location
+}
+
+===== FILE: ./terraform/modules/tag-bindings/variables.tf =====
+variable "parent" {
+  type = string
+}
+
+variable "location" {
+  type = string
+}
+
+variable "environment_tag_value" {
+  type = string
+}
+
+variable "owner_tag_value" {
+  type = string
+}
+
+variable "application_tag_value" {
+  type = string
+}
+
+===== FILE: ./terraform/modules/tag-bindings/outputs.tf =====
+output "environment_binding" {
+  value = google_tags_location_tag_binding.environment.name
+}
+
+output "owner_binding" {
+  value = google_tags_location_tag_binding.owner.name
+}
+
+output "application_binding" {
+  value = google_tags_location_tag_binding.application.name
+}
+
+===== FILE: ./terraform/modules/compute-snapshot/main.tf =====
+locals {
+  mandatory_labels = {
+    environment = var.environment
+    owner        = var.owner
+    application  = var.application
+  }
+}
+
+resource "google_compute_snapshot" "this" {
+
+  name = "${var.environment}-tagging-snapshot-01"
+
+  source_disk = var.source_disk
+
+  labels = local.mandatory_labels
+}
+
+===== FILE: ./terraform/modules/compute-snapshot/variables.tf =====
+variable "source_disk" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "owner" {
+  type = string
+}
+
+variable "application" {
+  type = string
+}
+
+===== FILE: ./terraform/modules/compute-snapshot/outputs.tf =====
+output "snapshot_name" {
+  value = google_compute_snapshot.this.name
+}
+
+===== FILE: ./terraform/modules/compute-instance/main.tf =====
+locals {
+  mandatory_labels = {
+    environment = var.environment
+    owner       = var.owner
+    application = var.application
+  }
+
+  instance_name = format(
+    "%s-%s-vm-01",
+    var.environment,
+    var.application
+  )
+}
+
+resource "google_compute_instance" "this" {
+
+  name = "${var.environment}-tagging-vm-01"
+  machine_type = var.machine_type
+  zone         = var.zone
+
+  labels = local.mandatory_labels
+
+  boot_disk {
+    initialize_params {
+      image = var.image
+    }
+  }
+
+  network_interface {
+    network = "default"
+
+    access_config {}
+  }
+}
+
+===== FILE: ./terraform/modules/compute-instance/variables.tf =====
+variable "environment" {
+  type = string
+
+  validation {
+    condition     = length(trimspace(var.environment)) > 0
+    error_message = "environment is mandatory."
+  }
+}
+
+variable "owner" {
+  type = string
+
+  validation {
+    condition     = length(trimspace(var.owner)) > 0
+    error_message = "owner is mandatory."
+  }
+}
+
+variable "application" {
+  type = string
+
+  validation {
+    condition     = length(trimspace(var.application)) > 0
+    error_message = "application is mandatory."
+  }
+}
+
+variable "project_id" {
+  type = string
+}
+
+variable "region" {
+  type = string
+}
+
+variable "zone" {
+  type = string
+}
+
+variable "machine_type" {
+  type    = string
+  default = "e2-micro"
+}
+
+variable "image" {
+  type    = string
+  default = "debian-cloud/debian-12"
+}
+
+
+===== FILE: ./terraform/modules/compute-instance/outputs.tf =====
+output "instance_name" {
+  value = google_compute_instance.this.name
+}
+
+output "instance_id" {
+  value = google_compute_instance.this.id
+}
+
+===== FILE: ./terraform/modules/compute-disk/main.tf =====
+locals {
+  mandatory_labels = {
+    environment = var.environment
+    owner        = var.owner
+    application  = var.application
+  }
+
+  disk_name = format(
+    "%s-%s-disk-01",
+    var.environment,
+    var.application
+  )
+}
+
+resource "google_compute_disk" "this" {
+
+  name = "${var.environment}-tagging-disk-01"
+  zone = var.zone
+
+  type    = var.type
+  size    = var.size_gb
+
+  labels = local.mandatory_labels
+
+  lifecycle {
+    precondition {
+      condition = alltrue([
+        contains(keys(local.mandatory_labels), "environment"),
+        contains(keys(local.mandatory_labels), "owner"),
+        contains(keys(local.mandatory_labels), "application")
+      ])
+
+      error_message = "Mandatory labels environment, owner and application are required."
+    }
+  }
+}
+
+===== FILE: ./terraform/modules/compute-disk/variables.tf =====
+variable "environment" {
+  type = string
+
+  validation {
+    condition     = length(trimspace(var.environment)) > 0
+    error_message = "environment is mandatory."
+  }
+}
+
+variable "owner" {
+  type = string
+
+  validation {
+    condition     = length(trimspace(var.owner)) > 0
+    error_message = "owner is mandatory."
+  }
+}
+
+variable "application" {
+  type = string
+
+  validation {
+    condition     = length(trimspace(var.application)) > 0
+    error_message = "application is mandatory."
+  }
+}
+
+variable "zone" {
+  type = string
+}
+
+variable "size_gb" {
+  type    = number
+  default = 10
+
+  validation {
+    condition     = var.size_gb >= 10
+    error_message = "Disk size must be at least 10 GB."
+  }
+}
+
+variable "type" {
+  type    = string
+  default = "pd-standard"
+}
+
+
+===== FILE: ./terraform/modules/compute-disk/outputs.tf =====
+output "disk_name" {
+  value = google_compute_disk.this.name
+}
+
+output "disk_id" {
+  value = google_compute_disk.this.id
+}
+
+output "disk_self_link" {
+  value = google_compute_disk.this.self_link
+}
+
+===== FILE: ./bootstrap/tags/list-tags.sh =====
+for KEY in $(gcloud resource-manager tags keys list \
+    --parent=organizations/321880981428 \
+    --format="value(name)"); do
+
+  echo
+  echo "===== $KEY ====="
+
+  gcloud resource-manager tags values list \
+      --parent="$KEY" \
+      --format="table(shortName,name)"
+
+done
+
+===== FILE: ./bootstrap/tags/provider.tf =====
+provider "google" {
+  project = var.project_id
+}
+
+===== FILE: ./bootstrap/tags/main.tf =====
+resource "google_tags_tag_key" "environment" {
+  parent     = "organizations/${var.org_id}"
+  short_name = "environment"
+}
+
+resource "google_tags_tag_key" "owner" {
+  parent     = "organizations/${var.org_id}"
+  short_name = "owner"
+}
+
+resource "google_tags_tag_key" "application" {
+  parent     = "organizations/${var.org_id}"
+  short_name = "application"
+}
+
+##################################################
+# Environment Tag Values
+##################################################
+
+resource "google_tags_tag_value" "dev" {
+  parent     = google_tags_tag_key.environment.id
+  short_name = "dev"
+}
+
+resource "google_tags_tag_value" "test" {
+  parent     = google_tags_tag_key.environment.id
+  short_name = "test"
+}
+
+resource "google_tags_tag_value" "uat" {
+  parent     = google_tags_tag_key.environment.id
+  short_name = "uat"
+}
+
+resource "google_tags_tag_value" "prod" {
+  parent     = google_tags_tag_key.environment.id
+  short_name = "prod"
+}
+
+##################################################
+# Owner Tag Values
+##################################################
+
+resource "google_tags_tag_value" "platform_team" {
+  parent     = google_tags_tag_key.owner.id
+  short_name = "platform-team"
+}
+
+resource "google_tags_tag_value" "cloud_team" {
+  parent     = google_tags_tag_key.owner.id
+  short_name = "cloud-team"
+}
+
+resource "google_tags_tag_value" "security_team" {
+  parent     = google_tags_tag_key.owner.id
+  short_name = "security-team"
+}
+
+resource "google_tags_tag_value" "networking_team" {
+  parent     = google_tags_tag_key.owner.id
+  short_name = "networking-team"
+}
+
+##################################################
+# Application Tag Values
+##################################################
+
+resource "google_tags_tag_value" "payments" {
+  parent     = google_tags_tag_key.application.id
+  short_name = "payments"
+}
+
+resource "google_tags_tag_value" "ecommerce" {
+  parent     = google_tags_tag_key.application.id
+  short_name = "ecommerce"
+}
+
+resource "google_tags_tag_value" "crm" {
+  parent     = google_tags_tag_key.application.id
+  short_name = "crm"
+}
+
+resource "google_tags_tag_value" "analytics" {
+  parent     = google_tags_tag_key.application.id
+  short_name = "analytics"
+}
+
+===== FILE: ./bootstrap/tags/variables.tf =====
+variable "project_id" {
+  type = string
+}
+
+variable "org_id" {
+  type = string
+}
+
+===== FILE: ./bootstrap/tags/versions.tf =====
+terraform {
+  required_version = ">= 1.5.0"
+
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 6.50.0"
+    }
+  }
+}
+
+===== FILE: ./bootstrap/tags/outputs.tf =====
+##################################################
+# Tag Keys
+##################################################
+
+output "environment_tag_key" {
+  value = google_tags_tag_key.environment.id
+}
+
+output "owner_tag_key" {
+  value = google_tags_tag_key.owner.id
+}
+
+output "application_tag_key" {
+  value = google_tags_tag_key.application.id
+}
+
+##################################################
+# Environment Tag Values
+##################################################
+
+output "environment_dev" {
+  value = google_tags_tag_value.dev.id
+}
+
+output "environment_test" {
+  value = google_tags_tag_value.test.id
+}
+
+output "environment_uat" {
+  value = google_tags_tag_value.uat.id
+}
+
+output "environment_prod" {
+  value = google_tags_tag_value.prod.id
+}
+
+##################################################
+# Owner Tag Values
+##################################################
+
+output "owner_platform_team" {
+  value = google_tags_tag_value.platform_team.id
+}
+
+output "owner_cloud_team" {
+  value = google_tags_tag_value.cloud_team.id
+}
+
+output "owner_security_team" {
+  value = google_tags_tag_value.security_team.id
+}
+
+output "owner_networking_team" {
+  value = google_tags_tag_value.networking_team.id
+}
+
+##################################################
+# Application Tag Values
+##################################################
+
+output "application_payments" {
+  value = google_tags_tag_value.payments.id
+}
+
+output "application_ecommerce" {
+  value = google_tags_tag_value.ecommerce.id
+}
+
+output "application_crm" {
+  value = google_tags_tag_value.crm.id
+}
+
+output "application_analytics" {
+  value = google_tags_tag_value.analytics.id
+}
+
+===== FILE: ./README.md =====
+# GCP Governance PoC - Eliminating Custom Code Using Cloud-Native Controls
+
+## Overview
+
+This repository contains a Proof of Concept (PoC) demonstrating how governance requirements can be implemented using native Google Cloud Platform (GCP) capabilities and Terraform, without building and maintaining custom applications.
+
+The objective of this PoC is to enforce mandatory metadata standards, validate approved values, provide resource classification capabilities, and restrict unauthorised resource creation using cloud-native controls.
+
+---
+
+## Objectives
+
+* Eliminate the need for custom Cloud Run applications for governance enforcement.
+* Enforce mandatory metadata standards across infrastructure resources.
+* Validate approved environment values.
+* Demonstrate governance controls for both Infrastructure-as-Code and direct CLI/API users.
+* Evaluate the applicability and limitations of GCP native controls.
+* Provide evidence-based recommendations for enterprise implementation.
+
+---
+
+## Scope
+
+The following GCP resource types were included in this PoC:
+
+* Compute Engine Virtual Machines
+* Compute Engine Zonal Persistent Disks
+* Compute Engine Snapshots
+
+---
+
+## Governance Controls Evaluated
+
+### 1. Terraform Validation
+
+Terraform variable validation was implemented to enforce approved environment values before infrastructure provisioning.
+
+Approved values:
+
+* dev
+* test
+* uat
+* prod
+
+Example invalid values:
+
+* km
+* demo
+* production
+
+---
+
+### 2. Terraform Mandatory Labels
+
+Terraform modules automatically inject mandatory labels into supported resources.
+
+Mandatory labels:
+
+* environment
+* owner
+* application
+
+Example:
+
+```hcl
+labels = {
+  environment = var.environment
+  owner        = var.owner
+  application  = var.application
+}
+```
+
+---
+
+### 3. Native GCP Behaviour Assessment
+
+Direct GCP CLI testing was performed to understand default platform behaviour.
+
+The following scenarios were evaluated:
+
+* Resource creation without labels
+* Resource creation with mandatory labels
+* Resource creation with invalid label values
+
+---
+
+### 4. Resource Manager Tags
+
+Resource Manager Tags were evaluated to determine support across resource types and to assess their suitability for future governance and policy use cases.
+
+Example Tag:
+
+```text
+environment=dev
+```
+
+---
+
+### 5. IAM Deny Policies
+
+IAM Deny Policies were evaluated as preventative controls to block unauthorised resource creation.
+
+Permissions tested:
+
+* compute.googleapis.com/instances.create
+* compute.googleapis.com/disks.create
+* compute.googleapis.com/snapshots.create
+
+---
+
+### 6. Custom Organization Policy Constraints
+
+Custom Organization Policy Constraints were evaluated to determine support for enforcing mandatory labels during direct CLI/API resource creation.
+
+Findings:
+
+* Compute Engine VM: Supported
+* Persistent Disk: Not Supported
+* Snapshot: Not Supported
+
+---
+
+## Repository Structure
+
+```text
+terraform-gcp-demo/
+├── terraform/
+│   ├── environments/
+│   │   ├── dev/
+│   │   ├── test/
+│   │   ├── uat/
+│   │   └── prod/
+│   └── modules/
+├── modules/
+│   ├── compute-instance/
+│   ├── compute-disk/
+│   └── compute-snapshot/
+├── org-policies/
+│   ├── custom-constraints/
+│   └── policies/
+├── iam-deny/
+├── terraform.sh
+├── README.md
+└── .gitignore
+```
+
+---
+
+## Deployment Process
+
+Terraform deployments are executed using the helper script:
+
+```bash
+./terraform.sh plan
+./terraform.sh apply
+./terraform.sh destroy
+```
+
+The script prompts users to select an environment:
+
+* dev
+* test
+* uat
+* prod
+
+---
+
+## Testing Approach
+
+Testing was conducted in the following sequence:
+
+```text
+Terraform Validation
+↓
+Terraform Mandatory Labels
+↓
+Native CLI Behaviour
+↓
+Resource Manager Tags
+↓
+IAM Deny Policies
+```
+
+---
+
+## Summary of Findings
+
+| Resource          | Terraform Validation | Terraform Labels | Native CLI Assessment | Resource Manager Tags | IAM Deny | Org Policy Custom Constraint |
+| ----------------- | -------------------: | ---------------: | --------------------: | --------------------: | -------: | ---------------------------: |
+| Compute Engine VM |                  Yes |              Yes |                   Yes |                   Yes |      Yes |                          Yes |
+| Persistent Disk   |                  Yes |              Yes |                   Yes |                   Yes |      Yes |                           No |
+| Snapshot          |                  Yes |              Yes |                   Yes |                   Yes |      Yes |                           No |
+
+---
+
+## Key Findings
+
+* Native GCP does not enforce business-specific label requirements by default.
+* Terraform validation effectively protects Infrastructure-as-Code deployments.
+* Terraform modules can automatically inject mandatory labels.
+* Resource Manager Tags provide additional classification capabilities.
+* IAM Deny Policies successfully block unauthorised resource creation after policy propagation.
+* Custom Organization Policy Constraints can enforce mandatory labels for Compute Engine VMs but are not universally supported across all resource types.
+* A layered governance approach is required to achieve comprehensive coverage.
+
+---
+
+## Recommended Governance Architecture
+
+### Terraform Users
+
+```text
+Terraform Validation
+↓
+Terraform Mandatory Labels
+```
+
+### Direct CLI/API Users
+
+```text
+Custom Organization Policy Constraints
+↓
+IAM Deny Policies
+```
+
+### Enterprise Governance Model
+
+```text
+Terraform Validation
+↓
+Terraform Mandatory Labels
+↓
+Custom Organization Policy Constraints
+↓
+Resource Manager Tags
+↓
+IAM Deny Policies
+```
+
+---
+
+## Conclusion
+
+This PoC demonstrates that enterprise governance requirements can be implemented using native GCP capabilities and Terraform without developing custom applications.
+
+A combination of Terraform validation, automatic label injection, Custom Organization Policy Constraints, Resource Manager Tags, and IAM Deny Policies provides a scalable and maintainable governance framework aligned with cloud-native best practices.
+
+---
+
+## Disclaimer
+
+This repository represents a Proof of Concept and should be adapted to organisational standards, security requirements, and operational processes before production implementation.
+
+===== FILE: ./findings/supported-resource-matrix.md =====
+| Resource         | Terraform | Org Policy | IAM Deny     | Status              |
+| ---------------- | --------- | ---------- | ------------ | ------------------- |
+| Compute Instance | ✅        | ✅         | Investigated | Supported           |
+| Compute Disk     | ✅        | ❌         | N/A          | Terraform Only      |
+| Storage Bucket   | ✅        | ⚠️          | N/A          | Under Investigation |
+| Service Accounts | N/A       | N/A        | ✅           | Validated           |
+
+
+===== FILE: ./findings/test-results.md =====
+  Test              | Expected          | Actual            | Result |
+| ----------------- | ----------------- | ----------------- | ------ |
+| VM without labels | Denied            | Denied            | ✅      |
+| VM partial labels | Denied            | Denied            | ✅      |
+| VM valid labels   | Created           | Created           | ✅      |
+| Disk Org Policy   | Unsupported       | Unsupported       | ✅      |
+| IAM Deny          | Permission denied | Permission denied | ✅      |
+
+
+## Resource Manager Tag Binding Findings
+
+- Resource Manager Tags were successfully attached to Compute Engine VMs using gcloud.
+- Tag visibility was verified in the GCP Console.
+- Terraform automation using:
+  - google_tags_tag_binding
+  - google_tags_location_tag_binding
+  could not be completed due to provider behaviour inconsistencies observed with Google Provider v6.50.0.
+- The PoC successfully demonstrated the capability using native GCP tooling without custom applications.
+
+
+===== FILE: ./findings/enforce-mandatory-labels.yaml =====
+name: organizations/321880981428/policies/custom.requireEnvironmentLabel
+
+spec:
+  rules:
+  - enforce: true
+
+===== FILE: ./findings/test-update.yaml =====
+name: organizations/321880981428/customConstraints/custom.requireApplicationLabel
+resourceTypes:
+- compute.googleapis.com/Instance
+methodTypes:
+- CREATE
+- UPDATE
+condition: "!('application' in resource.labels)"
+actionType: DENY
+displayName: Require Application Label
+description: Deny VM creation or update when application label is missing.
+
+===== FILE: ./docs/layer-2/README.md =====
+# Layer 2 - Brownfield Detection Using Cloud Asset Inventory
+
+## Overview
+
+Layer 2 provides brownfield detection capabilities using native Google Cloud services without requiring custom applications or runtime components.
+
+The implementation exports Cloud Asset Inventory resource metadata, including labels, into BigQuery and uses standard SQL queries to identify non-compliant resources.
+
+---
+
+## Architecture
+
+Cloud Asset Inventory
+↓
+BigQuery Export
+↓
+BigQuery SQL
+↓
+Brownfield Detection
+
+---
+
+## Services Used
+
+| Service               | Purpose                  |
+| --------------------- | ------------------------ |
+| Cloud Asset Inventory | Export resource metadata |
+| BigQuery              | Store exported assets    |
+| BigQuery SQL          | Detect missing labels    |
+| gcloud CLI            | Execute exports          |
+| bq CLI                | Query exported data      |
+
+No Cloud Run services or custom applications are required.
+
+---
+
+## APIs Enabled
+
+```bash
+gcloud services enable \
+    cloudasset.googleapis.com \
+    bigquery.googleapis.com
+```
+
+---
+
+## BigQuery Dataset
+
+Dataset Name:
+
+```text
+governance_inventory
+```
+
+Location:
+
+```text
+europe-west2
+```
+
+Creation:
+
+```bash
+bq mk \
+    --location=europe-west2 \
+    governance_inventory
+```
+
+---
+
+## Cloud Asset Export
+
+Validated export command:
+
+```bash
+gcloud asset export \
+    --project=project-a9c3b175-7f78-4ba6-9ad \
+    --content-type=resource \
+    --asset-types="compute.googleapis.com/Instance,compute.googleapis.com/Disk,compute.googleapis.com/Snapshot" \
+    --bigquery-table="projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory/tables/asset_export" \
+    --output-bigquery-force
+```
+
+---
+
+## Export Validation
+
+The export completed successfully using the Cloud Asset Inventory service agent.
+
+Service Agent:
+
+```text
+service-106228803995@gcp-sa-cloudasset.iam.gserviceaccount.com
+```
+
+BigQuery Load Job:
+
+| Attribute         | Value                             |
+| ----------------- | --------------------------------- |
+| Status            | Success                           |
+| Duration          | 11 seconds                        |
+| Source Format     | NEWLINE_DELIMITED_JSON            |
+| Destination Table | governance_inventory.asset_export |
+
+---
+
+## Export Verification
+
+Exported row count:
+
+```bash
+bq query \
+    --location=europe-west2 \
+    --use_legacy_sql=false \
+    '
+    SELECT COUNT(*) total
+    FROM `project-a9c3b175-7f78-4ba6-9ad.governance_inventory.asset_export`
+    '
+```
+
+Result:
+
+```text
+12 resources exported
+```
+
+---
+
+## Exported Resource Types
+
+Validated resource types:
+
+* Compute Engine Instances
+* Persistent Disks
+* Snapshots
+
+---
+
+## Label Validation
+
+Labels were successfully exported within resource metadata.
+
+Validation query:
+
+```bash
+bq query \
+    --location=europe-west2 \
+    --use_legacy_sql=false \
+    '
+    SELECT
+      name,
+      asset_type,
+      resource.data
+    FROM `project-a9c3b175-7f78-4ba6-9ad.governance_inventory.asset_export`
+    LIMIT 1
+    '
+```
+
+Sample output:
+
+```json
+"labels": {
+    "application": "payments",
+    "environment": "dev",
+    "owner": "platform-team"
+}
+```
+
+---
+
+## Compliance Detection Queries
+
+Missing environment label:
+
+```sql
+SELECT
+    name,
+    asset_type
+FROM `project-a9c3b175-7f78-4ba6-9ad.governance_inventory.asset_export`
+WHERE NOT REGEXP_CONTAINS(resource.data, '"environment"');
+```
+
+Missing owner label:
+
+```sql
+SELECT
+    name,
+    asset_type
+FROM `project-a9c3b175-7f78-4ba6-9ad.governance_inventory.asset_export`
+WHERE NOT REGEXP_CONTAINS(resource.data, '"owner"');
+```
+
+Missing application label:
+
+```sql
+SELECT
+    name,
+    asset_type
+FROM `project-a9c3b175-7f78-4ba6-9ad.governance_inventory.asset_export`
+WHERE NOT REGEXP_CONTAINS(resource.data, '"application"');
+```
+
+All non-compliant resources:
+
+```sql
+SELECT
+    name,
+    asset_type
+FROM `project-a9c3b175-7f78-4ba6-9ad.governance_inventory.asset_export`
+WHERE NOT REGEXP_CONTAINS(resource.data, '"environment"')
+   OR NOT REGEXP_CONTAINS(resource.data, '"owner"')
+   OR NOT REGEXP_CONTAINS(resource.data, '"application"');
+```
+
+---
+
+## Known Findings
+
+### Project-Level Export
+
+Project-level Cloud Asset Inventory export to BigQuery was successfully validated.
+
+Status:
+
+```text
+SUPPORTED
+```
+
+---
+
+### Organisation-Level Export
+
+Organisation-level export using:
+
+```bash
+--per-asset-type
+```
+
+returned:
+
+```text
+INVALID_ARGUMENT
+```
+
+within the tested environment and was not validated as part of this PoC.
+
+Status:
+
+```text
+NOT VALIDATED
+```
+
+---
+
+## Layer 2 PoC Outcome
+
+Layer 2 successfully demonstrated that brownfield resources can be detected using fully managed Google Cloud services and standard tooling.
+
+No custom code, Cloud Run services, or bespoke applications were required.
+
+
+===== FILE: ./scripts/delete-all.sh =====
+#!/bin/bash
+set -euo pipefail
+
+source "$(dirname "$0")/config.sh"
+
+echo "======================================"
+echo "Deleting All Governance Artefacts"
+echo "======================================"
+
+echo ""
+echo "======================================"
+echo "Deleting IAM Deny Policies"
+echo "======================================"
+
+delete_deny_policy() {
+    POLICY_ID=$1
+
+    echo "Deleting ${POLICY_ID}..."
+
+    gcloud iam policies delete "${POLICY_ID}" \
+        --attachment-point="cloudresourcemanager.googleapis.com/projects/${PROJECT_NUMBER}" \
+        --kind=denypolicies \
+        >/dev/null 2>&1 \
+        && echo "✓ ${POLICY_ID} deleted." \
+        || echo "✓ ${POLICY_ID} not found. Skipping."
+}
+
+delete_deny_policy "deny-vm-governance"
+delete_deny_policy "deny-disk-governance"
+delete_deny_policy "deny-snapshot-governance"
+
+echo ""
+echo "======================================"
+echo "Deleting Org Policies"
+echo "======================================"
+
+delete_org_policy() {
+    POLICY_NAME=$1
+
+    echo "Deleting ${POLICY_NAME}..."
+
+    gcloud org-policies delete "${POLICY_NAME}" \
+        --organization="${ORG_ID}" \
+        >/dev/null 2>&1 \
+        && echo "✓ ${POLICY_NAME} deleted." \
+        || echo "✓ ${POLICY_NAME} not found. Skipping."
+}
+
+delete_org_policy "custom.requireEnvironmentLabel1"
+delete_org_policy "custom.requireApplicationLabel1"
+delete_org_policy "custom.requireOwnerLabel1"
+
+echo ""
+echo "======================================"
+echo "Deleting Custom Constraints"
+echo "======================================"
+
+delete_constraint() {
+    CONSTRAINT_NAME=$1
+
+    echo "Deleting ${CONSTRAINT_NAME}..."
+
+    gcloud org-policies delete-custom-constraint \
+        "${CONSTRAINT_NAME}" \
+        --organization="${ORG_ID}" \
+        >/dev/null 2>&1 \
+        && echo "✓ ${CONSTRAINT_NAME} deleted." \
+        || echo "✓ ${CONSTRAINT_NAME} not found. Skipping."
+}
+
+delete_constraint "custom.requireEnvironmentLabels"
+delete_constraint "custom.requireApplicationLabels"
+delete_constraint "custom.requireOwnerLabels"
+
+echo ""
+echo "======================================"
+echo "All Governance Artefacts Deleted"
+echo "======================================"
+
+echo ""
+echo "Removed:"
+echo "  ✓ IAM Deny Policies"
+echo "  ✓ Org Policies"
+echo "  ✓ Custom Constraints"
+
+echo ""
+echo "Verify using:"
+echo "    ./scripts/verify-all.sh"
+
+echo ""
+
+===== FILE: ./scripts/disable-all.sh =====
+#!/bin/bash
+set -euo pipefail
+
+source "$(dirname "$0")/config.sh"
+
+echo "======================================"
+echo "Disabling Governance Enforcement"
+echo "======================================"
+
+echo ""
+echo "======================================"
+echo "Removing IAM Deny Policies"
+echo "======================================"
+
+delete_deny_policy() {
+    POLICY_ID=$1
+
+    echo "Removing ${POLICY_ID}..."
+
+    gcloud iam policies delete "${POLICY_ID}" \
+        --attachment-point="cloudresourcemanager.googleapis.com/projects/${PROJECT_NUMBER}" \
+        --kind=denypolicies \
+        >/dev/null 2>&1 \
+        && echo "✓ ${POLICY_ID} removed." \
+        || echo "✓ ${POLICY_ID} not found. Skipping."
+}
+
+delete_deny_policy "deny-vm-governance"
+delete_deny_policy "deny-disk-governance"
+delete_deny_policy "deny-snapshot-governance"
+
+echo ""
+echo "======================================"
+echo "Disabling Org Policies"
+echo "======================================"
+
+disable_policy() {
+    POLICY_NAME=$1
+
+    echo "Removing ${POLICY_NAME}..."
+
+    gcloud org-policies delete "${POLICY_NAME}" \
+        --organization="${ORG_ID}" \
+        >/dev/null 2>&1 \
+        && echo "✓ ${POLICY_NAME} removed." \
+        || echo "✓ ${POLICY_NAME} not found. Skipping."
+}
+
+disable_policy "custom.requireEnvironmentLabels"
+disable_policy "custom.requireApplicationLabels"
+disable_policy "custom.requireOwnerLabels"
+
+echo ""
+echo "======================================"
+echo "Governance Enforcement Disabled"
+echo "======================================"
+
+echo ""
+echo "Retained:"
+echo "  ✓ Custom Constraints"
+
+echo ""
+echo "Removed:"
+echo "  ✓ IAM Deny Policies"
+echo "  ✓ Org Policies"
+
+echo ""
+echo "To re-enable governance run:"
+echo "    ./scripts/enable-all.sh"
+
+echo ""
+
+===== FILE: ./scripts/verify-all.sh =====
+#!/bin/bash
+
+source "$(dirname "$0")/config.sh"
+
+echo "======================================"
+echo "Custom Constraints"
+echo "======================================"
+
+gcloud org-policies list-custom-constraints \
+    --organization="${ORG_ID}"
+
+echo ""
+echo "======================================"
+echo "Org Policies"
+echo "======================================"
+
+gcloud org-policies list \
+    --organization="${ORG_ID}"
+
+echo ""
+echo "======================================"
+echo "IAM Deny Policies"
+echo "======================================"
+
+gcloud iam policies list \
+    --attachment-point="cloudresourcemanager.googleapis.com/projects/${PROJECT_NUMBER}" \
+    --kind=denypolicies
+
+===== FILE: ./scripts/enable-all.sh =====
+#!/bin/bash
+set -euo pipefail
+
+source "$(dirname "$0")/config.sh"
+
+echo "======================================"
+echo "Enabling Governance Controls"
+echo "======================================"
+
+echo ""
+echo "======================================"
+echo "Updating Custom Constraints"
+echo "======================================"
+
+gcloud org-policies set-custom-constraint \
+    org-policies/custom-constraints/environment-label.yaml
+
+gcloud org-policies set-custom-constraint \
+    org-policies/custom-constraints/application-label.yaml
+
+gcloud org-policies set-custom-constraint \
+    org-policies/custom-constraints/owner-label.yaml
+
+echo ""
+echo "======================================"
+echo "Updating Org Policies"
+echo "======================================"
+
+gcloud org-policies set-policy \
+    org-policies/policies/environment-policy.yaml
+
+gcloud org-policies set-policy \
+    org-policies/policies/application-policy.yaml
+
+gcloud org-policies set-policy \
+    org-policies/policies/owner-policy.yaml
+
+echo ""
+echo "======================================"
+echo "Ensuring IAM Deny Policies Exist"
+echo "======================================"
+
+POLICIES=$(gcloud iam policies list \
+    --attachment-point="cloudresourcemanager.googleapis.com/projects/${PROJECT_NUMBER}" \
+    --kind=denypolicies \
+    --format="value(name)" 2>/dev/null || true)
+
+create_deny_policy() {
+    local POLICY_ID=$1
+    local POLICY_FILE=$2
+
+    if echo "${POLICIES}" | grep -Fq "/${POLICY_ID}"; then
+        echo "✓ ${POLICY_ID} already exists. Skipping."
+    else
+        gcloud iam policies create "${POLICY_ID}" \
+            --attachment-point="cloudresourcemanager.googleapis.com/projects/${PROJECT_NUMBER}" \
+            --kind=denypolicies \
+            --policy-file="${POLICY_FILE}"
+
+        echo "✓ ${POLICY_ID} created."
+    fi
+}
+
+create_deny_policy \
+    "deny-vm-governance" \
+    "iam-deny/deny-vm-governance.yaml"
+
+create_deny_policy \
+    "deny-disk-governance" \
+    "iam-deny/deny-disk-governance.yaml"
+
+create_deny_policy \
+    "deny-snapshot-governance" \
+    "iam-deny/deny-snapshot-governance.yaml"
+
+echo ""
+echo "======================================"
+echo "Governance Controls Enabled"
+echo "======================================"
+
+echo ""
+echo "Enabled Controls:"
+echo "  ✓ Custom Constraints"
+echo "      - requireEnvironmentLabels"
+echo "      - requireApplicationLabels"
+echo "      - requireOwnerLabels"
+
+echo ""
+echo "  ✓ Org Policies"
+echo "      - custom.requireEnvironmentLabels"
+echo "      - custom.requireApplicationLabels"
+echo "      - custom.requireOwnerLabel1"
+
+echo ""
+echo "  ✓ IAM Deny Policies"
+echo "      - deny-vm-governance"
+echo "      - deny-disk-governance"
+echo "      - deny-snapshot-governance"
+
+echo ""
+echo "Verify using:"
+echo "    ./scripts/verify-all.sh"
+
+echo ""
+
+===== FILE: ./scripts/config.sh =====
+#!/bin/bash
+
+export ORG_ID="321880981428"
+export PROJECT_ID="project-a9c3b175-7f78-4ba6-9ad"
+export PROJECT_NUMBER="106228803995"
+
+===== FILE: ./iam-deny/deny-disk-governance.yaml =====
+rules:
+  - denyRule:
+      deniedPrincipals:
+        - "principalSet://goog/public:all"
+
+      exceptionPrincipals:
+        - "principal://goog/subject/rohith555raju@gmail.com"
+
+      deniedPermissions:
+        - "compute.googleapis.com/disks.create"
+        - "compute.googleapis.com/disks.setLabels"
+
+===== FILE: ./iam-deny/deny-snapshot-governance.yaml =====
+rules:
+  - denyRule:
+      deniedPrincipals:
+        - "principalSet://goog/public:all"
+
+      exceptionPrincipals:
+        - "principal://goog/subject/rohith555raju@gmail.com"
+
+      deniedPermissions:
+        - "compute.googleapis.com/snapshots.create"
+        - "compute.googleapis.com/snapshots.setLabels"
+
+===== FILE: ./iam-deny/deny-vm-governance.yaml =====
+rules:
+  - denyRule:
+      deniedPrincipals:
+        - "principalSet://goog/public:all"
+
+      exceptionPrincipals:
+        - "principal://goog/subject/rohith555raju@gmail.com"
+
+      deniedPermissions:
+        - "compute.googleapis.com/instances.create"
+        - "compute.googleapis.com/instances.setLabels"
+        - "compute.googleapis.com/instances.createTagBinding"
+
