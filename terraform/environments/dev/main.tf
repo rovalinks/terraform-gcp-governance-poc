@@ -19,11 +19,35 @@ module "compute_instance" {
   environment = var.environment
   owner        = var.owner
   application  = var.application
-
+ 
   project_id   = "project-a9c3b175-7f78-4ba6-9ad"
   region       = "europe-west2"
   zone         = "europe-west2-a"
 }
+
+# module "vm_tag_bindings" {
+
+#  source = "../../modules/tag-bindings"
+
+#  depends_on = [
+#   module.compute_instance
+#  ]
+
+#  parent = format(
+#    "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
+#    "106228803995",
+#    "europe-west2-a",
+#    module.compute_instance.instance_id
+#  )
+
+#  location = "europe-west2-a"
+
+#  environment_tag_value = "tagValues/281481837036535"
+
+#  owner_tag_value = "tagValues/281476571583996"
+
+#  application_tag_value = "tagValues/281484425365550"
+#}
 
 module "compute_disk" {
 
@@ -48,8 +72,9 @@ module "compute_snapshot" {
   depends_on = [
     module.compute_disk
   ]
-
+  
   environment = var.environment
   owner        = var.owner
   application  = var.application
+
 }

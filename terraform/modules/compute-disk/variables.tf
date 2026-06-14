@@ -43,3 +43,4 @@ variable "type" {
   type    = string
   default = "pd-standard"
 }
+

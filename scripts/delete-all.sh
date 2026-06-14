@@ -25,9 +25,9 @@ delete_deny_policy() {
         || echo "✓ ${POLICY_ID} not found. Skipping."
 }
 
-delete_deny_policy "deny-vm-create"
-delete_deny_policy "deny-disk-create"
-delete_deny_policy "deny-snapshot-create"
+delete_deny_policy "deny-vm-governance"
+delete_deny_policy "deny-disk-governance"
+delete_deny_policy "deny-snapshot-governance"
 
 echo ""
 echo "======================================"
@@ -68,9 +68,9 @@ delete_constraint() {
         || echo "✓ ${CONSTRAINT_NAME} not found. Skipping."
 }
 
-delete_constraint "custom.requireEnvironmentLabel1"
-delete_constraint "custom.requireApplicationLabel1"
-delete_constraint "custom.requireOwnerLabel1"
+delete_constraint "custom.requireEnvironmentLabels"
+delete_constraint "custom.requireApplicationLabels"
+delete_constraint "custom.requireOwnerLabels"
 
 echo ""
 echo "======================================"

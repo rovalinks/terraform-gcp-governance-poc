@@ -1,0 +1,16 @@
+policies:
+- createTime: '2026-06-13T10:07:55.932063Z'
+  kind: DenyPolicy
+  name: policies/cloudresourcemanager.googleapis.com%2Fprojects%2F106228803995/denypolicies/deny-disk-governance
+  uid: 8daf8c39-f9d2-fecc-3e50-4f3e6558c0d0
+  updateTime: '2026-06-13T10:07:55.932063Z'
+- createTime: '2026-06-13T10:07:57.571055Z'
+  kind: DenyPolicy
+  name: policies/cloudresourcemanager.googleapis.com%2Fprojects%2F106228803995/denypolicies/deny-snapshot-governance
+  uid: d2cfc997-3024-3a4f-b3f4-c18e76a252c8
+  updateTime: '2026-06-13T10:07:57.571055Z'
+- createTime: '2026-06-13T10:07:54.303487Z'
+  kind: DenyPolicy
+  name: policies/cloudresourcemanager.googleapis.com%2Fprojects%2F106228803995/denypolicies/deny-vm-governance
+  uid: 7b52d0fd-09cd-e54d-bb90-71307578d492
+  updateTime: '2026-06-13T10:07:54.303487Z'
