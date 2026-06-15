@@ -118,30 +118,30 @@ module "disk_tag_bindings" {
 }
 
 
-module "snapshot_tag_bindings" {
+# module "snapshot_tag_bindings" {
 
-  source = "../../modules/tag-bindings"
+#   source = "../../modules/tag-bindings"
 
-  for_each = module.compute_snapshot.snapshot_numeric_id
+#   for_each = module.compute_snapshot.snapshot_numeric_id
 
-  depends_on = [
-    module.compute_snapshot
-  ]
+#   depends_on = [
+#     module.compute_snapshot
+#   ]
 
-  parent = format(
-    "//compute.googleapis.com/projects/%s/global/snapshots/%s",
-    "106228803995",
-    each.value
-  )
+#   parent = format(
+#     "//compute.googleapis.com/projects/%s/global/snapshots/%s",
+#     "106228803995",
+#     each.value
+#   )
 
-  location = "global"
+#   location = "global"
 
-  environment_tag_value = local.environment_tag_map[var.environment]
+#   environment_tag_value = local.environment_tag_map[var.environment]
 
-  owner_tag_value       = local.owner_tag_map[var.owner]
+#   owner_tag_value       = local.owner_tag_map[var.owner]
 
-  application_tag_value = local.application_tag_map[var.application]
-}
+#   application_tag_value = local.application_tag_map[var.application]
+# }
 
 # module "snapshot_tag_bindings" {
 
