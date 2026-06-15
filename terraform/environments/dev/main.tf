@@ -25,7 +25,7 @@ module "compute_instance" {
   zone         = "europe-west2-a"
 }
 
-resource "google_compute_instance" "vm" {
+resource "google_compute_instance" "old-vm" {
   name         = "legacy-vm"
   machine_type = "e2-medium"
 
