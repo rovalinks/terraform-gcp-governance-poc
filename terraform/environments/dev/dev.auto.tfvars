@@ -1,5 +1,5 @@
 environment = "dev"
-owner       = "dev-team"
+owner       = "platform-team"
 application = "payments"
 workload_ids = [
   "01"
