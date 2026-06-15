@@ -97,6 +97,10 @@ module "disk_tag_bindings" {
 
   for_each = module.compute_disk.disk_numeric_id
 
+  depends_on = [
+    module.compute_disk
+  ]
+
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/disks/%s",
     "106228803995",
