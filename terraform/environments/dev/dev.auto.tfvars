@@ -2,7 +2,7 @@ environment = "dev"
 owner       = "platform-team"
 application = "payments"
 workload_ids = [
-  "01"
+  "01", "02"
 ]
 
   
