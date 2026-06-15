@@ -18,7 +18,7 @@ resource "google_compute_snapshot" "this" {
   )
 
   source_disk = format(
-  "%s-%s-vm-%s",
+  "%s-%s-disk-%s",
   var.environment,
   var.application,
   each.value
