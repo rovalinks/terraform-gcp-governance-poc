@@ -69,6 +69,8 @@ module "vm_tag_bindings" {
 
   source = "../../modules/tag-bindings"
 
+  for_each = module.compute_instance.instance_numeric_id
+
   depends_on = [
     module.compute_instance
   ]
@@ -77,7 +79,7 @@ module "vm_tag_bindings" {
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
     "106228803995",
     "europe-west2-a",
-    module.compute_instance.instance_numeric_id["01"]
+    each.value
   )
 
   location = "europe-west2-a"
