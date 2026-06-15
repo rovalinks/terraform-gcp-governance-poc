@@ -4,3 +4,10 @@ output "snapshot_names" {
     k => v.name
   }
 }
+
+output "snapshot_numeric_id" {
+  value = {
+    for k, v in google_compute_snapshot.this :
+    k => v.snapshot_id
+  }
+}

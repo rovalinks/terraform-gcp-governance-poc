@@ -5,10 +5,10 @@ output "disk_names" {
   }
 }
 
-output "disk_ids" {
+output "disk_numeric_id" {
   value = {
     for k, v in google_compute_disk.this :
-    k => v.id
+    k => v.disk_id
   }
 }
 
