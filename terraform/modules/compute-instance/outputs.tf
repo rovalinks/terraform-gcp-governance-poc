@@ -5,9 +5,9 @@ output "instance_name" {
   }
 }
 
-output "instance_id" {
+output "instance_numeric_id" {
   value = {
     for k, v in google_compute_instance.this :
-    k => v.name
+    k => v.instance_id
   }
 }

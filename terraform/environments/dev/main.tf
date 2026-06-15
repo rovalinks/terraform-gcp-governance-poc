@@ -77,7 +77,7 @@ module "vm_tag_bindings" {
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
     "106228803995",
     "europe-west2-a",
-    module.compute_instance.instance_id["01"]
+    module.compute_instance.instance_numeric_id["01"]
   )
 
   location = "europe-west2-a"
