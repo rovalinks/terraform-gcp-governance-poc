@@ -19,13 +19,14 @@ module "compute_instance" {
   environment = var.environment
   owner        = var.owner
   application  = var.application
+  instance_number = 1
  
   project_id   = "project-a9c3b175-7f78-4ba6-9ad"
   region       = "europe-west2"
   zone         = "europe-west2-a"
 }
 
-resource "google_compute_instance" "old-vm" {
+resource "google_compute_instance" "legacy-vm" {
   name         = "legacy-vm"
   machine_type = "e2-medium"
 
@@ -72,6 +73,7 @@ module "compute_disk" {
   environment = var.environment
   owner        = var.owner
   application  = var.application
+  instance_number = 1
 
   zone = "europe-west2-a"
 
