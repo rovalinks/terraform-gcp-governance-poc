@@ -24,11 +24,17 @@ resource "google_compute_instance" "this" {
 
   labels = local.mandatory_labels
 
-  boot_disk {
-    initialize_params {
-      image = var.image
-    }
-  }
+boot_disk {
+
+  source = format(
+    "%s-%s-disk-%s",
+    var.environment,
+    var.application,
+    each.value
+  )
+
+  auto_delete = false
+}
 
   network_interface {
     network = "default"

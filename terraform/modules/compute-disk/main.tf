@@ -22,6 +22,8 @@ resource "google_compute_disk" "this" {
   type = var.type
   size = var.size_gb
 
+  image = var.image
+
   labels = local.mandatory_labels
 
   lifecycle {

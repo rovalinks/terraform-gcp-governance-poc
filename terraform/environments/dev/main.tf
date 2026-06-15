@@ -13,7 +13,27 @@ provider "google" {
   zone    = "europe-west2-a"
 }
 
+module "compute_disk" {
+
+  source = "../../modules/compute-disk"
+
+  environment = var.environment
+  owner        = var.owner
+  application  = var.application
+  workload_ids = var.workload_ids
+
+  zone    = "europe-west2-a"
+  size_gb = 10
+  type    = "pd-standard"
+
+  image = "debian-cloud/debian-12"
+}
+
 module "compute_instance" {
+
+  depends_on = [
+    module.compute_disk
+  ]
 
   source = "../../modules/compute-instance"
 
@@ -26,6 +46,8 @@ module "compute_instance" {
   region     = "europe-west2"
   zone       = "europe-west2-a"
 }
+
+
 
 resource "google_compute_instance" "legacy-vm" {
   name         = "legacy-vm"
@@ -67,19 +89,6 @@ resource "google_compute_instance" "legacy-vm" {
 #  application_tag_value = "tagValues/281484425365550"
 #}
 
-# module "compute_disk" {
-
-#   source = "../../modules/compute-disk"
-
-#   environment = var.environment
-#   owner        = var.owner
-#   application  = var.application
-#   workload_ids = var.workload_ids
-
-#   zone    = "europe-west2-a"
-#   size_gb = 10
-#   type    = "pd-standard"
-# }
 
 module "compute_snapshot" {
 

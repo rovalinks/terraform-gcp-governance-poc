@@ -47,3 +47,8 @@ variable "type" {
 variable "workload_ids" {
   type = set(string)
 }
+
+variable "image" {
+  type    = string
+  default = "debian-cloud/debian-12"
+}
