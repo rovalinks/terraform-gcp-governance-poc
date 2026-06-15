@@ -13,6 +13,23 @@ provider "google" {
   zone    = "europe-west2-a"
 }
 
+
+resource "google_compute_instance" "legacy-vm" {
+  name         = "legacy-vm"
+  machine_type = "e2-medium"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+}
+
 module "compute_disk" {
 
   source = "../../modules/compute-disk"
@@ -48,46 +65,29 @@ module "compute_instance" {
 }
 
 
+module "vm_tag_bindings" {
 
-resource "google_compute_instance" "legacy-vm" {
-  name         = "legacy-vm"
-  machine_type = "e2-medium"
+  source = "../../modules/tag-bindings"
 
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
-  }
+  depends_on = [
+    module.compute_instance
+  ]
 
-  network_interface {
-    network = "default"
-    access_config {}
-  }
+  parent = format(
+    "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
+    "106228803995",
+    "europe-west2-a",
+    module.compute_instance.instance_id["01"]
+  )
+
+  location = "europe-west2-a"
+
+  environment_tag_value = local.environment_tag_map[var.environment]
+
+  owner_tag_value = local.owner_tag_map[var.owner]
+
+  application_tag_value = local.application_tag_map[var.application]
 }
-
-# module "vm_tag_bindings" {
-
-#  source = "../../modules/tag-bindings"
-
-#  depends_on = [
-#   module.compute_instance
-#  ]
-
-#  parent = format(
-#    "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
-#    "106228803995",
-#    "europe-west2-a",
-#    module.compute_instance.instance_id
-#  )
-
-#  location = "europe-west2-a"
-
-#  environment_tag_value = "tagValues/281481837036535"
-
-#  owner_tag_value = "tagValues/281476571583996"
-
-#  application_tag_value = "tagValues/281484425365550"
-#}
 
 
 module "compute_snapshot" {
