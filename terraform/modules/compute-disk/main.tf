@@ -4,26 +4,23 @@ locals {
     owner        = var.owner
     application  = var.application
   }
-
-  disk_name = format(
-    "%s-%s-disk-01",
-    var.environment,
-    var.application
-  )
 }
 
 resource "google_compute_disk" "this" {
 
+  for_each = var.workload_ids
+
   name = format(
-  "%s-tagging-vm-%02d",
-  var.environment,
-  var.instance_number
+    "%s-%s-disk-%s",
+    var.environment,
+    var.application,
+    each.value
   )
 
   zone = var.zone
 
-  type    = var.type
-  size    = var.size_gb
+  type = var.type
+  size = var.size_gb
 
   labels = local.mandatory_labels
 

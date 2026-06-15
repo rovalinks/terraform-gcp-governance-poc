@@ -31,3 +31,17 @@ variable "application" {
     error_message = "Application is mandatory."
   }
 }
+
+variable "workload_ids" {
+  description = "List of workload identifiers"
+  type        = set(string)
+
+  validation {
+    condition = alltrue([
+      for id in var.workload_ids :
+      can(regex("^\\d{2}$", id))
+    ])
+
+    error_message = "Workload IDs must be two digits (01, 02, 03)."
+  }
+}

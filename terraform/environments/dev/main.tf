@@ -14,16 +14,17 @@ provider "google" {
 }
 
 module "compute_instance" {
+
   source = "../../modules/compute-instance"
 
   environment = var.environment
   owner        = var.owner
   application  = var.application
-  instance_number = 1
- 
-  project_id   = "project-a9c3b175-7f78-4ba6-9ad"
-  region       = "europe-west2"
-  zone         = "europe-west2-a"
+  workload_ids = var.workload_ids
+
+  project_id = "project-a9c3b175-7f78-4ba6-9ad"
+  region     = "europe-west2"
+  zone       = "europe-west2-a"
 }
 
 resource "google_compute_instance" "legacy-vm" {
@@ -73,10 +74,9 @@ module "compute_disk" {
   environment = var.environment
   owner        = var.owner
   application  = var.application
-  instance_number = 1
+  workload_ids = var.workload_ids
 
-  zone = "europe-west2-a"
-
+  zone    = "europe-west2-a"
   size_gb = 10
   type    = "pd-standard"
 }
@@ -85,14 +85,12 @@ module "compute_snapshot" {
 
   source = "../../modules/compute-snapshot"
 
-  source_disk      = "${var.environment}-tagging-disk-01"
-
   depends_on = [
     module.compute_disk
   ]
-  
+
   environment = var.environment
   owner        = var.owner
   application  = var.application
-
+  workload_ids = var.workload_ids
 }

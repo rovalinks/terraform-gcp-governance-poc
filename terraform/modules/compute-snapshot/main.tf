@@ -8,9 +8,21 @@ locals {
 
 resource "google_compute_snapshot" "this" {
 
-  name = "${var.environment}-tagging-snapshot-01"
+  for_each = var.workload_ids
 
-  source_disk = var.source_disk
+  name = format(
+    "%s-%s-snapshot-%s",
+    var.environment,
+    var.application,
+    each.value
+  )
+
+  source_disk = format(
+    "%s-%s-disk-%s",
+    var.environment,
+    var.application,
+    each.value
+  )
 
   labels = local.mandatory_labels
 }

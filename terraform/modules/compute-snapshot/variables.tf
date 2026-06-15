@@ -1,7 +1,3 @@
-variable "source_disk" {
-  type = string
-}
-
 variable "environment" {
   type = string
 }
@@ -12,4 +8,8 @@ variable "owner" {
 
 variable "application" {
   type = string
+}
+
+variable "workload_ids" {
+  type = set(string)
 }

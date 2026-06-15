@@ -1,3 +1,6 @@
-output "snapshot_name" {
-  value = google_compute_snapshot.this.name
+output "snapshot_names" {
+  value = {
+    for k, v in google_compute_snapshot.this :
+    k => v.name
+  }
 }
