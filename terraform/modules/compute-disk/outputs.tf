@@ -5,10 +5,16 @@ output "disk_names" {
   }
 }
 
-output "disk_id" {
-  value = google_compute_disk.this.id
+output "disk_ids" {
+  value = {
+    for k, v in google_compute_disk.this :
+    k => v.id
+  }
 }
 
-output "disk_self_link" {
-  value = google_compute_disk.this.self_link
+output "disk_self_links" {
+  value = {
+    for k, v in google_compute_disk.this :
+    k => v.self_link
+  }
 }
