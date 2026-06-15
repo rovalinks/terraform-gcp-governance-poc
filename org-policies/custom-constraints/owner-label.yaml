@@ -1,4 +1,4 @@
-name: organizations/321880981428/customConstraints/custom.requiredOwnerLabels
+name: organizations/321880981428/customConstraints/custom.requireOwnerLabels
 resourceTypes:
 - compute.googleapis.com/Instance
 methodTypes:
