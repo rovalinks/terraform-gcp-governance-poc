@@ -14,7 +14,12 @@ locals {
 
 resource "google_compute_instance" "this" {
 
-  name = "${var.environment}-tagging-vm-01"
+  name = format(
+  "%s-tagging-vm-%02d",
+  var.environment,
+  var.instance_number
+ )
+
   machine_type = var.machine_type
   zone         = var.zone
 

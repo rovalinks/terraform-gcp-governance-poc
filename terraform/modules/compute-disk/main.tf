@@ -14,7 +14,12 @@ locals {
 
 resource "google_compute_disk" "this" {
 
-  name = "${var.environment}-tagging-disk-01"
+  name = format(
+  "%s-tagging-vm-%02d",
+  var.environment,
+  var.instance_number
+  )
+
   zone = var.zone
 
   type    = var.type

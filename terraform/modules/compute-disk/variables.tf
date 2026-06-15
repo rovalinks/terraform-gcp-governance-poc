@@ -44,3 +44,8 @@ variable "type" {
   default = "pd-standard"
 }
 
+variable "instance_number" {
+  description = "Instance sequence number"
+  type        = number
+  default     = 1
+}

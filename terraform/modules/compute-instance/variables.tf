@@ -47,3 +47,9 @@ variable "image" {
   default = "debian-cloud/debian-12"
 }
 
+variable "instance_number" {
+  description = "Instance sequence number"
+  type        = number
+  default     = 1
+}
+
