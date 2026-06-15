@@ -67,26 +67,26 @@ resource "google_compute_instance" "legacy-vm" {
 #  application_tag_value = "tagValues/281484425365550"
 #}
 
-module "compute_disk" {
+# module "compute_disk" {
 
-  source = "../../modules/compute-disk"
+#   source = "../../modules/compute-disk"
 
-  environment = var.environment
-  owner        = var.owner
-  application  = var.application
-  workload_ids = var.workload_ids
+#   environment = var.environment
+#   owner        = var.owner
+#   application  = var.application
+#   workload_ids = var.workload_ids
 
-  zone    = "europe-west2-a"
-  size_gb = 10
-  type    = "pd-standard"
-}
+#   zone    = "europe-west2-a"
+#   size_gb = 10
+#   type    = "pd-standard"
+# }
 
 module "compute_snapshot" {
 
   source = "../../modules/compute-snapshot"
 
   depends_on = [
-    module.compute_disk
+    module.compute_instance
   ]
 
   environment = var.environment
