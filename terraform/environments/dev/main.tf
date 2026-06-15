@@ -25,6 +25,22 @@ module "compute_instance" {
   zone         = "europe-west2-a"
 }
 
+resource "google_compute_instance" "vm" {
+  name         = "legacy-vm"
+  machine_type = "e2-medium"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+}
+
 # module "vm_tag_bindings" {
 
 #  source = "../../modules/tag-bindings"
