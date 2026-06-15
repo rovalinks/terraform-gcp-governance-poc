@@ -1,154 +1,481 @@
-# GCP Governance PoC - Eliminating Custom Code Using Cloud-Native Controls
+# GCP Governance PoC Repository Structure
 
-## Overview
+## Repository Overview
 
-This repository contains a Proof of Concept (PoC) demonstrating how governance requirements can be implemented using native Google Cloud Platform (GCP) capabilities and Terraform, without building and maintaining custom applications.
+This repository demonstrates a cloud-native governance framework implemented using Terraform and native Google Cloud capabilities, eliminating the need for custom applications.
 
-The objective of this PoC is to enforce mandatory metadata standards, validate approved values, provide resource classification capabilities, and restrict unauthorised resource creation using cloud-native controls.
+The implementation covers:
 
----
-
-## Objectives
-
-* Eliminate the need for custom Cloud Run applications for governance enforcement.
-* Enforce mandatory metadata standards across infrastructure resources.
-* Validate approved environment values.
-* Demonstrate governance controls for both Infrastructure-as-Code and direct CLI/API users.
-* Evaluate the applicability and limitations of GCP native controls.
-* Provide evidence-based recommendations for enterprise implementation.
+* Layer 1 - Preventative Controls
+* Layer 2 - Brownfield Detection
+* Layer 3 - Remediation and Revalidation
 
 ---
 
-## Scope
-
-The following GCP resource types were included in this PoC:
-
-* Compute Engine Virtual Machines
-* Compute Engine Zonal Persistent Disks
-* Compute Engine Snapshots
-
----
-
-## Governance Controls Evaluated
-
-### 1. Terraform Validation
-
-Terraform variable validation was implemented to enforce approved environment values before infrastructure provisioning.
-
-Approved values:
-
-* dev
-* test
-* uat
-* prod
-
-Example invalid values:
-
-* km
-* demo
-* production
-
----
-
-### 2. Terraform Mandatory Labels
-
-Terraform modules automatically inject mandatory labels into supported resources.
-
-Mandatory labels:
-
-* environment
-* owner
-* application
-
-Example:
-
-```hcl
-labels = {
-  environment = var.environment
-  owner        = var.owner
-  application  = var.application
-}
-```
-
----
-
-### 3. Native GCP Behaviour Assessment
-
-Direct GCP CLI testing was performed to understand default platform behaviour.
-
-The following scenarios were evaluated:
-
-* Resource creation without labels
-* Resource creation with mandatory labels
-* Resource creation with invalid label values
-
----
-
-### 4. Resource Manager Tags
-
-Resource Manager Tags were evaluated to determine support across resource types and to assess their suitability for future governance and policy use cases.
-
-Example Tag:
-
-```text
-environment=dev
-```
-
----
-
-### 5. IAM Deny Policies
-
-IAM Deny Policies were evaluated as preventative controls to block unauthorised resource creation.
-
-Permissions tested:
-
-* compute.googleapis.com/instances.create
-* compute.googleapis.com/disks.create
-* compute.googleapis.com/snapshots.create
-
----
-
-### 6. Custom Organization Policy Constraints
-
-Custom Organization Policy Constraints were evaluated to determine support for enforcing mandatory labels during direct CLI/API resource creation.
-
-Findings:
-
-* Compute Engine VM: Supported
-* Persistent Disk: Not Supported
-* Snapshot: Not Supported
-
----
-
-## Repository Structure
+# Repository Structure
 
 ```text
 terraform-gcp-demo/
-├── terraform/
-│   ├── environments/
-│   │   ├── dev/
-│   │   ├── test/
-│   │   ├── uat/
-│   │   └── prod/
-│   └── modules/
-├── modules/
-│   ├── compute-instance/
-│   ├── compute-disk/
-│   └── compute-snapshot/
-├── org-policies/
-│   ├── custom-constraints/
-│   └── policies/
+├── bootstrap/
+├── docs/
+├── evidence/
+├── findings/
 ├── iam-deny/
-├── terraform.sh
+├── org-policies/
+├── scripts/
+├── terraform/
 ├── README.md
-└── .gitignore
+├── terraform.sh
+└── supporting files
 ```
 
 ---
 
-## Deployment Process
+# 1. bootstrap/
 
-Terraform deployments are executed using the helper script:
+Purpose:
+
+Bootstrap foundational governance artefacts required before enforcement.
+
+```text
+bootstrap
+└── tags
+```
+
+Contents:
+
+| File               | Purpose                           |
+| ------------------ | --------------------------------- |
+| list-tags.sh       | Lists all Tag Keys and Tag Values |
+| main.tf            | Creates Tag Keys and Tag Values   |
+| outputs.tf         | Outputs created tag identifiers   |
+| provider.tf        | Provider configuration            |
+| variables.tf       | Input variables                   |
+| versions.tf        | Terraform version constraints     |
+| terraform.tfstate* | Bootstrap state                   |
+
+Responsibilities:
+
+* Create Resource Manager Tag Keys
+* Create approved Tag Values
+* Establish organisation tagging standards
+
+---
+
+# 2. docs/
+
+Purpose:
+
+Customer-facing documentation.
+
+```text
+docs
+├── layer-1
+├── layer-2
+├── layer-3
+├── Required_Permissions_and_Roles.md
+└── test_cases.md
+```
+
+Contents:
+
+Layer 1:
+
+Preventative governance controls.
+
+Layer 2:
+
+Brownfield detection.
+
+Layer 3:
+
+Remediation lifecycle.
+
+Permissions:
+
+Required IAM roles.
+
+Test Cases:
+
+End-to-end validation evidence.
+
+Responsibilities:
+
+* Operational guidance
+* Customer handover
+* Audit artefacts
+
+---
+
+# 3. evidence/
+
+Purpose:
+
+Proof that testing was performed.
+
+```text
+evidence
+├── commands
+├── screenshots
+└── test-results
+```
+
+Contents:
+
+Test outputs:
+
+```text
+application-values.txt
+environment-values.txt
+governance-deny-policies.txt
+owner-values.txt
+tag-bootstrap-output.txt
+tag-keys.txt
+```
+
+Responsibilities:
+
+* Audit evidence
+* Demonstrate outcomes
+* Support customer sign-off
+
+---
+
+# 4. findings/
+
+Purpose:
+
+Capture lessons learned and platform limitations.
+
+```text
+findings
+├── enforce-mandatory-labels.yaml
+├── supported-resource-matrix.md
+├── test-results.md
+└── test-update.yaml
+```
+
+Responsibilities:
+
+* Document unsupported scenarios
+* Track discoveries
+* Record validation outcomes
+
+Example Findings:
+
+* Org Policies supported for VMs.
+* Org Policies unsupported for Disks.
+* IAM Deny successfully validated.
+
+---
+
+# 5. iam-deny/
+
+Purpose:
+
+Prevent unauthorised actions.
+
+```text
+iam-deny
+├── deny-disk-governance.yaml
+├── deny-snapshot-governance.yaml
+└── deny-vm-governance.yaml
+```
+
+Responsibilities:
+
+Prevent:
+
+```text
+VM creation
+Disk creation
+Snapshot creation
+
+Label modifications
+
+Tag binding changes
+```
+
+Governance Layer:
+
+Layer 1
+
+---
+
+# 6. org-policies/
+
+Purpose:
+
+Enforce organisation-wide standards.
+
+```text
+org-policies
+├── custom-constraints
+└── policies
+```
+
+## custom-constraints/
+
+Defines business logic.
+
+Examples:
+
+```text
+environment-label.yaml
+application-label.yaml
+owner-label.yaml
+```
+
+Unsupported experiments:
+
+```text
+unsupported/
+```
+
+Responsibilities:
+
+Validate:
+
+```text
+environment labels
+owner labels
+application labels
+```
+
+---
+
+## policies/
+
+Activates constraints.
+
+Examples:
+
+```text
+environment-policy.yaml
+application-policy.yaml
+owner-policy.yaml
+```
+
+Responsibilities:
+
+Turn constraints into enforcement.
+
+Governance Layer:
+
+Layer 1
+
+---
+
+# 7. scripts/
+
+Purpose:
+
+Operational automation.
+
+```text
+scripts
+├── config.sh
+├── delete-all.sh
+├── disable-all.sh
+├── enable-all.sh
+└── verify-all.sh
+```
+
+Responsibilities:
+
+Enable controls:
+
+```text
+./scripts/enable-all.sh
+```
+
+Disable controls:
+
+```text
+./scripts/disable-all.sh
+```
+
+Verification:
+
+```text
+./scripts/verify-all.sh
+```
+
+Cleanup:
+
+```text
+./scripts/delete-all.sh
+```
+
+---
+
+# 8. terraform/
+
+Purpose:
+
+Infrastructure-as-Code implementation.
+
+```text
+terraform
+├── environments
+├── modules
+└── state
+```
+
+---
+
+## environments/
+
+Environment-specific configurations.
+
+```text
+dev
+test
+uat
+prod
+```
+
+Responsibilities:
+
+Provide:
+
+```text
+environment
+owner
+application
+```
+
+values.
+
+---
+
+### dev/
+
+Contains active PoC implementation.
+
+Files:
+
+```text
+main.tf
+variables.tf
+locals.tf
+dev.auto.tfvars
+tag-test.tf
+terraform.tfstate*
+```
+
+Responsibilities:
+
+Deploy:
+
+* VMs
+* Disks
+* Snapshots
+
+Apply:
+
+Mandatory labels.
+
+---
+
+# modules/
+
+Reusable infrastructure components.
+
+```text
+compute-instance
+compute-disk
+compute-snapshot
+storage-bucket
+cloud-sql
+tag-bindings
+```
+
+Responsibilities:
+
+Encapsulate governance logic.
+
+---
+
+## compute-instance/
+
+Deploy VMs.
+
+Features:
+
+* Mandatory labels
+* Validation
+* Outputs
+
+---
+
+## compute-disk/
+
+Deploy disks.
+
+Features:
+
+* Mandatory labels
+* Preconditions
+* Outputs
+
+---
+
+## compute-snapshot/
+
+Deploy snapshots.
+
+Features:
+
+* Mandatory labels
+* Outputs
+
+---
+
+## tag-bindings/
+
+Resource Manager Tags.
+
+Features:
+
+Attach:
+
+```text
+environment
+owner
+application
+```
+
+tags.
+
+---
+
+# state/
+
+Stores Terraform state.
+
+Contents:
+
+```text
+terraform.tfstate
+terraform.tfstate.backup
+```
+
+Responsibilities:
+
+Track deployed infrastructure.
+
+---
+
+# Root Files
+
+## terraform.sh
+
+Purpose:
+
+Environment selector.
+
+Example:
 
 ```bash
 ./terraform.sh plan
@@ -156,97 +483,97 @@ Terraform deployments are executed using the helper script:
 ./terraform.sh destroy
 ```
 
-The script prompts users to select an environment:
+Responsibilities:
 
-* dev
-* test
-* uat
-* prod
+Simplify deployments.
 
 ---
 
-## Testing Approach
+## README.md
 
-Testing was conducted in the following sequence:
+Purpose:
+
+Repository overview.
+
+Responsibilities:
+
+Describe:
+
+* Architecture
+* Objectives
+* Findings
+* Outcomes
+
+---
+
+## repo_source_dump.txt
+
+Purpose:
+
+Repository snapshot.
+
+Responsibilities:
+
+Documentation and troubleshooting.
+
+---
+
+## testdisk.log
+
+Purpose:
+
+Testing artefact.
+
+Responsibilities:
+
+Historical troubleshooting evidence.
+
+---
+
+# Governance Mapping
+
+| Repository Area | Layer 1 | Layer 2 | Layer 3 |
+| --------------- | ------: | ------: | ------: |
+| bootstrap       |       ✓ |         |         |
+| terraform       |       ✓ |         |         |
+| iam-deny        |       ✓ |         |         |
+| org-policies    |       ✓ |         |         |
+| scripts         |       ✓ |         |         |
+| docs/layer-1    |       ✓ |         |         |
+| docs/layer-2    |         |       ✓ |         |
+| docs/layer-3    |         |         |       ✓ |
+| evidence        |       ✓ |       ✓ |       ✓ |
+| findings        |       ✓ |       ✓ |       ✓ |
+
+---
+
+# Final Architecture
 
 ```text
-Terraform Validation
+Layer 1
+Prevent
 ↓
-Terraform Mandatory Labels
+Terraform + Org Policies + IAM Deny
+
+Layer 2
+Detect
 ↓
-Native CLI Behaviour
+Cloud Asset Inventory + BigQuery
+
+Layer 3
+Remediate
 ↓
-Resource Manager Tags
-↓
-IAM Deny Policies
+Fix Resources + Re-export + Revalidate
 ```
 
 ---
 
-## Summary of Findings
+# Repository Outcome
 
-| Resource          | Terraform Validation | Terraform Labels | Native CLI Assessment | Resource Manager Tags | IAM Deny | Org Policy Custom Constraint |
-| ----------------- | -------------------: | ---------------: | --------------------: | --------------------: | -------: | ---------------------------: |
-| Compute Engine VM |                  Yes |              Yes |                   Yes |                   Yes |      Yes |                          Yes |
-| Persistent Disk   |                  Yes |              Yes |                   Yes |                   Yes |      Yes |                           No |
-| Snapshot          |                  Yes |              Yes |                   Yes |                   Yes |      Yes |                           No |
+This repository demonstrates an end-to-end cloud-native governance framework capable of:
 
----
-
-## Key Findings
-
-* Native GCP does not enforce business-specific label requirements by default.
-* Terraform validation effectively protects Infrastructure-as-Code deployments.
-* Terraform modules can automatically inject mandatory labels.
-* Resource Manager Tags provide additional classification capabilities.
-* IAM Deny Policies successfully block unauthorised resource creation after policy propagation.
-* Custom Organization Policy Constraints can enforce mandatory labels for Compute Engine VMs but are not universally supported across all resource types.
-* A layered governance approach is required to achieve comprehensive coverage.
-
----
-
-## Recommended Governance Architecture
-
-### Terraform Users
-
-```text
-Terraform Validation
-↓
-Terraform Mandatory Labels
-```
-
-### Direct CLI/API Users
-
-```text
-Custom Organization Policy Constraints
-↓
-IAM Deny Policies
-```
-
-### Enterprise Governance Model
-
-```text
-Terraform Validation
-↓
-Terraform Mandatory Labels
-↓
-Custom Organization Policy Constraints
-↓
-Resource Manager Tags
-↓
-IAM Deny Policies
-```
-
----
-
-## Conclusion
-
-This PoC demonstrates that enterprise governance requirements can be implemented using native GCP capabilities and Terraform without developing custom applications.
-
-A combination of Terraform validation, automatic label injection, Custom Organization Policy Constraints, Resource Manager Tags, and IAM Deny Policies provides a scalable and maintainable governance framework aligned with cloud-native best practices.
-
----
-
-## Disclaimer
-
-This repository represents a Proof of Concept and should be adapted to organisational standards, security requirements, and operational processes before production implementation.
+* Preventing non-compliant resources.
+* Detecting existing violations.
+* Supporting remediation workflows.
+* Producing audit evidence.
+* Eliminating the need for custom Cloud Run governance applications.
