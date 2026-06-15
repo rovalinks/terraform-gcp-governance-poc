@@ -82,7 +82,7 @@ module "vm_tag_bindings" {
     each.value
   )
 
-  location = "europe-west2-a"
+  #location = "europe-west2-a"
 
   environment_tag_value = local.environment_tag_map[var.environment]
 
@@ -108,7 +108,7 @@ module "disk_tag_bindings" {
     each.value
   )
 
-  location = "europe-west2-a"
+#  location = "europe-west2-a"
 
   environment_tag_value = local.environment_tag_map[var.environment]
 
@@ -134,7 +134,7 @@ module "snapshot_tag_bindings" {
     each.value
   )
 
-  location = "global"
+  #location = "europe-west2-a"
 
   environment_tag_value = local.environment_tag_map[var.environment]
 

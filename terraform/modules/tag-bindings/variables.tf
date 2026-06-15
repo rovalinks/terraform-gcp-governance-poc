@@ -2,9 +2,9 @@ variable "parent" {
   type = string
 }
 
-variable "location" {
-  type = string
-}
+# variable "location" {
+#   type = string
+# }
 
 variable "environment_tag_value" {
   type = string
