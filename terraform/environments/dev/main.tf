@@ -118,20 +118,23 @@ module "disk_tag_bindings" {
 }
 
 
-module "snpshot_tag_bindings" {
+module "snapshot_tag_bindings" {
 
   source = "../../modules/tag-bindings"
 
   for_each = module.compute_snapshot.snapshot_numeric_id
 
+  depends_on = [
+    module.compute_snapshot
+  ]
+
   parent = format(
-    "//compute.googleapis.com/projects/%s/zones/%s/snapshots/%s",
+    "//compute.googleapis.com/projects/%s/global/snapshots/%s",
     "106228803995",
-    "europe-west2-a",
     each.value
   )
 
-  location = "europe-west2-a"
+  location = "global"
 
   environment_tag_value = local.environment_tag_map[var.environment]
 
