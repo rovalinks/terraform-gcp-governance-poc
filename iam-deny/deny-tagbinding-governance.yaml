@@ -1,0 +1,15 @@
+rules:
+  - denyRule:
+      # FIX: The exact native universal principal identifier for Deny Policies
+      deniedPrincipals:
+        - "principalSet://goog/public:all"
+
+      # FIX: The exact format for an individual user exception
+      exceptionPrincipals:
+        - "principal://goog/subject/rohith555raju@gmail.com"
+
+      # Clear, isolated compute permissions
+      deniedPermissions:
+        - "compute.googleapis.com/instances.create"
+        - "compute.googleapis.com/instances.createTagBinding"
+        - "compute.googleapis.com/instances.deleteTagBinding"
