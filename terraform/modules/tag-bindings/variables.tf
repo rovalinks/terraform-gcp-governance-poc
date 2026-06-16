@@ -1,4 +1,12 @@
-variable "parent" {
+variable "environment" {
+  type = string
+}
+
+variable "owner" {
+  type = string
+}
+
+variable "application" {
   type = string
 }
 
@@ -6,14 +14,7 @@ variable "location" {
   type = string
 }
 
-variable "environment_tag_value" {
+variable "parent" {
   type = string
 }
 
-variable "owner_tag_value" {
-  type = string
-}
-
-variable "application_tag_value" {
-  type = string
-}

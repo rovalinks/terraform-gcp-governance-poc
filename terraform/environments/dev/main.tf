@@ -84,11 +84,11 @@ module "vm_tag_bindings" {
 
   location = "europe-west2-a"
 
-  environment_tag_value = environment_tag_map[var.environment]
+  environment = var.environment
 
-  owner_tag_value = owner_tag_map[var.owner]
+  owner = var.owner
 
-  application_tag_value = application_tag_map[var.application]
+  application = var.application
 }
 
 module "disk_tag_bindings" {
@@ -110,11 +110,11 @@ module "disk_tag_bindings" {
 
   location = "europe-west2-a"
 
-  environment_tag_value = environment_tag_map[var.environment]
+  environment = var.environment
 
-  owner_tag_value       = owner_tag_map[var.owner]
+  owner = var.owner
 
-  application_tag_value = application_tag_map[var.application]
+  application = var.application
 }
 
 
@@ -136,11 +136,11 @@ module "snapshot_tag_bindings" {
 
   location = "global"
 
-  environment_tag_value = environment_tag_map[var.environment]
+  environment = var.environment
 
-  owner_tag_value       = owner_tag_map[var.owner]
+  owner    = var.owner
 
-  application_tag_value = application_tag_map[var.application]
+  application = var.application
 }
 
 # module "snapshot_tag_bindings" {
@@ -157,11 +157,11 @@ module "snapshot_tag_bindings" {
 
 #   location = "global"
 
-#   environment_tag_value = local.environment_tag_map[var.environment]
+#   environment = var.environment
 
-#   owner_tag_value       = local.owner_tag_map[var.owner]
+#   owner_tag_value       = var.owner
 
-#   application_tag_value = local.application_tag_map[var.application]
+#   application_tag_value = var.application
 # }
 
 module "compute_snapshot" {
