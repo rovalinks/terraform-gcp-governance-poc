@@ -1,0 +1,32 @@
+main:
+  steps:
+    - generateTimestamp:
+        assign:
+          - current_time: ${string(sys.now())}
+          # Extract YYYYMMDD from "2026-06-16..."
+          - date_part: ${text.substring(current_time, 0, 4) + text.substring(current_time, 5, 7) + text.substring(current_time, 8, 10)}
+          # Extract HHMM from "...T08:52..."
+          - time_part: ${text.substring(current_time, 11, 13) + text.substring(current_time, 14, 16)}
+          - ts: ${date_part + "_" + time_part}
+
+    - exportAssets:
+        call: http.post
+        args:
+          url: https://cloudasset.googleapis.com/v1/projects/project-a9c3b175-7f78-4ba6-9ad:exportAssets
+          auth:
+            type: OAuth2
+          body:
+            contentType: RESOURCE
+            assetTypes:
+              - compute.googleapis.com/Instance
+              - compute.googleapis.com/Disk
+              - compute.googleapis.com/Snapshot
+            outputConfig:
+              bigqueryDestination:
+                dataset: projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory
+                table: ${"asset_export_" + ts}
+                force: true
+        result: exportResult
+
+    - returnResult:
+        return: ${exportResult.body}
