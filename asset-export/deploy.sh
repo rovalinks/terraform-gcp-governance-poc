@@ -13,12 +13,12 @@ mkdir -p scripts
 
 # Deploy Export Workflow
 gcloud workflows deploy cai-export-workflow \
-    --source=scripts/export-workflow.yaml \
+    --source=asset-export/export-workflow.yaml \
     --location="$GCP_REGION"
 
 # Deploy Cleanup Workflow
 gcloud workflows deploy cai-cleanup-workflow \
-    --source=scripts/cleanup-workflow.yaml \
+    --source=asset-export/cleanup-workflow.yaml \
     --location="$GCP_REGION"
 
 echo "=== ✅ Workflows Deployed Successfully ==="

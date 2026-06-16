@@ -56,6 +56,7 @@ main:
               - compute.googleapis.com/Instance
               - compute.googleapis.com/Disk
               - compute.googleapis.com/Snapshot
+              - bigquery.googleapis.com/Dataset
             outputConfig:
               bigqueryDestination:
                 dataset: "projects/${PROJECT_ID}/datasets/governance_inventory"
@@ -197,7 +198,7 @@ gcloud scheduler jobs create http cai-export-job \
 
 # Recreate Cleanup Job (Every 3 Hours)
 gcloud scheduler jobs create http cai-cleanup-job \
-    --schedule="0 */3 * * *" \
+    --schedule="*/30 * * * *" \
     --location="$GCP_REGION" \
     --uri="https://workflowexecutions.googleapis.com/v1/projects/${PROJECT_ID}/locations/${GCP_REGION}/workflows/cai-cleanup-workflow/executions" \
     --oauth-service-account-email="$WORKFLOW_SA"

@@ -224,3 +224,28 @@ module "compute_snapshot" {
   application  = var.application
   workload_ids = var.workload_ids
 }
+
+
+/*
+resource "google_bigquery_dataset" "governance_inventory1" {
+  dataset_id = "governance_inventory1"
+  location   = "europe-west2"
+
+  }
+*/
+
+resource "google_bigquery_dataset" "governance_inventory1" {
+  dataset_id = "governance_inventory1"
+  location   = "europe-west2"
+
+  labels = {
+    environment = var.environment
+    owner        = var.owner
+    application  = var.application
+  }
+}
+
+resource "google_bigquery_dataset" "governance_inventory2" {
+  dataset_id = "governance_inventory2"
+  location   = "europe-west2"
+}
