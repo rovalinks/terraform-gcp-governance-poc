@@ -7,6 +7,12 @@ rules:
         - "principal://goog/subject/rohith555raju@gmail.com"
 
       deniedPermissions:
-        - "compute.googleapis.com/instances.create"
-        - "compute.googleapis.com/instances.setLabels"
-        - "compute.googleapis.com/instances.createTagBinding"
+
+      # VM Protections
+        - "compute.googleapis.com/instances.deleteTagBinding"
+       
+      # Disk Protections 
+        - "compute.googleapis.com/disks.deleteTagBinding"
+
+      # Snapshot Protections 
+        - "compute.googleapis.com/snapshots.deleteTagBinding"
