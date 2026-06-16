@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = ">= 5.0.0"
-    }
-  }
-}
-
 # Local block to dynamic-load and parse your centralized YAML file
 locals {
   # Looks up two directories from 'environments/dev/' to find your 'iam-deny' folder
