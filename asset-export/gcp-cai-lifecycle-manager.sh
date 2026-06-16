@@ -29,8 +29,8 @@ mkdir -p scripts
 # -------------------------------------------------------------------------
 # 2. Generate the Dynamic Asset Export Workflow File
 # -------------------------------------------------------------------------
-echo "📝 Writing scripts/export-workflow.yaml..."
-cat << EOF > scripts/export-workflow.yaml
+echo "📝 Writing asset-export/export-workflow.yaml..."
+cat << EOF > asset-export/export-workflow.yaml
 main:
   steps:
     - generateTimestamp:
@@ -53,10 +53,19 @@ main:
           body:
             contentType: RESOURCE
             assetTypes:
-              - compute.googleapis.com/Instance
-              - compute.googleapis.com/Disk
-              - compute.googleapis.com/Snapshot
               - bigquery.googleapis.com/Dataset
+              - storage.googleapis.com/Bucket
+              - compute.googleapis.com/Disk
+              - compute.googleapis.com/ForwardingRule
+              - compute.googleapis.com/Address
+              - pubsub.googleapis.com/Topic
+              - container.googleapis.com/NodePool
+              - artifactregistry.googleapis.com/Repository
+              - compute.googleapis.com/InstanceTemplate
+              - sqladmin.googleapis.com/Instance
+              - container.googleapis.com/Cluster
+              - compute.googleapis.com/InstanceGroupManager
+              - compute.googleapis.com/Instance
             outputConfig:
               bigqueryDestination:
                 dataset: "projects/${PROJECT_ID}/datasets/governance_inventory"
@@ -71,8 +80,8 @@ EOF
 # -------------------------------------------------------------------------
 # 3. Generate the Dynamic Cleanup Workflow File
 # -------------------------------------------------------------------------
-echo "📝 Writing scripts/cleanup-workflow.yaml..."
-cat << EOF > scripts/cleanup-workflow.yaml
+echo "📝 Writing asset-export/cleanup-workflow.yaml..."
+cat << EOF > asset-export/cleanup-workflow.yaml
 main:
   steps:
     - listTables:
@@ -141,12 +150,12 @@ EOF
 # -------------------------------------------------------------------------
 echo "🚀 Deploying 'cai-export-workflow' to ${GCP_REGION}..."
 gcloud workflows deploy cai-export-workflow \
-    --source=scripts/export-workflow.yaml \
+    --source=asset-export/export-workflow.yaml \
     --location="$GCP_REGION"
 
 echo "🚀 Deploying 'cai-cleanup-workflow' to ${GCP_REGION}..."
 gcloud workflows deploy cai-cleanup-workflow \
-    --source=scripts/cleanup-workflow.yaml \
+    --source=asset-export/cleanup-workflow.yaml \
     --location="$GCP_REGION"
 
 # -------------------------------------------------------------------------
