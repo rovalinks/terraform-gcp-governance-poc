@@ -1,14 +1,20 @@
+# Look up the current GCP project context dynamically from the active provider configuration
+data "google_project" "current" {}
+
 # Local block to dynamic-load and parse your centralized YAML file
 locals {
-  deny_config = yamldecode(file("${path.module}/../../../iam-deny/deny-tagbinding-governance.yaml"))
+  # FIX: path.module targets terraform/environments/dev/
+  # Walking up 3 levels brings us out to the repository root where iam-deny/ sits
+  deny_config_path = "${path.module}/../../../iam-deny/deny-tagbinding-governance.yaml"
+  deny_config      = yamldecode(file(local.deny_config_path))
 }
 
 # Native IAM Deny Policy deployment for Tag and Instance Governance
 resource "google_iam_deny_policy" "deny_tagbinding_governance" {
-  provider     = google-beta
+  provider = google-beta
   
-  # FIX: Must be the full URL string wrapped inside urlencode()
-  parent       = urlencode("cloudresourcemanager.googleapis.com/projects/106228803995")
+  # FIX: Dynamically interpolates the Project Number from the data source and wraps it inside urlencode()
+  parent = urlencode("cloudresourcemanager.googleapis.com/projects/${data.google_project.current.number}")
   
   name         = "deny-tagbinding-governance"
   display_name = "Guardrail: Prevent Tag Removal (From YAML File)"

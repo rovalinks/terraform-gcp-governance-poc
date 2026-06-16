@@ -11,10 +11,15 @@ main:
           - second: ${text.substring(current_time, 17, 19)}
           - ts: ${day + "_" + month + "_" + year + "_" + hour + minute + second}
 
+    - getContext:
+        assign:
+          # Automatically discovers the runtime project context
+          - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+
     - exportAssets:
         call: http.post
         args:
-          url: "https://cloudasset.googleapis.com/v1/projects/project-a9c3b175-7f78-4ba6-9ad:exportAssets"
+          url: ${"https://cloudasset.googleapis.com/v1/projects/" + project_id + ":exportAssets"}
           auth:
             type: OAuth2
           body:
@@ -25,7 +30,7 @@ main:
               - compute.googleapis.com/Snapshot
             outputConfig:
               bigqueryDestination:
-                dataset: "projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory"
+                dataset: ${"projects/" + project_id + "/datasets/governance_inventory"}
                 table: ${"asset_export_" + ts}
                 force: true
         result: exportResult

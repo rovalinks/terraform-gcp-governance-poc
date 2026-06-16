@@ -10,6 +10,8 @@ rules:
 
       # Clear, isolated compute permissions
       deniedPermissions:
-        - "compute.googleapis.com/instances.create"
         - "compute.googleapis.com/instances.createTagBinding"
         - "compute.googleapis.com/instances.deleteTagBinding"
+
+        - "compute.googleapis.com/disks.createTagBinding"
+        - "compute.googleapis.com/disks.deleteTagBinding"
