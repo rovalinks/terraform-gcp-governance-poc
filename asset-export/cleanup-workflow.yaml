@@ -1,13 +1,9 @@
 main:
   steps:
-    - getContext:
-        assign:
-          - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
-
     - listTables:
         call: http.get
         args:
-          url: ${"https://bigquery.googleapis.com/bigquery/v2/projects/" + project_id + "/datasets/governance_inventory/tables"}
+          url: "https://bigquery.googleapis.com/bigquery/v2/projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory/tables"
           auth:
             type: OAuth2
         result: tablesResponse
@@ -50,7 +46,7 @@ main:
             - deleteTable:
                 call: http.delete
                 args:
-                  url: ${"https://bigquery.googleapis.com/bigquery/v2/projects/" + project_id + "/datasets/governance_inventory/tables/" + tableId}
+                  url: ${"https://bigquery.googleapis.com/bigquery/v2/projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory/tables/" + tableId}
                   auth:
                     type: OAuth2
 
