@@ -13,6 +13,23 @@ provider "google" {
   zone    = "europe-west2-a"
 }
 
+
+resource "google_compute_instance" "legacy-vm" {
+  name         = "legacy-vm"
+  machine_type = "e2-medium"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+}
+
 /*
 resource "google_compute_instance" "legacy-vm" {
 
@@ -59,25 +76,6 @@ module "legacy_vm_tag_bindings" {
   application  = var.application
 }
 */
-
-
-resource "google_compute_instance" "legacy-vm" {
-  name         = "legacy-vm"
-  machine_type = "e2-medium"
-
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-11"
-    }
-  }
-
-  network_interface {
-    network = "default"
-    access_config {}
-  }
-}
-
-
 
 module "compute_disk" {
 
