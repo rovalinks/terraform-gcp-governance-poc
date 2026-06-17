@@ -1,0 +1,2 @@
+Export in progress for root asset [projects/project-a9c3b175-7f78-4ba6-9ad].
+Use [gcloud asset operations describe projects/106228803995/operations/ExportAssets/RESOURCE/84ae4d4f44697991cb5e228d640eb846] to check the status of the operation.

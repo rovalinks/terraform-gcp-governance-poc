@@ -20,7 +20,7 @@ case $choice in
     4)  ENV="prod"
         ;;
     *)
-        echo "Invalid selection."
+        echo -e "\nEnvironment must be one of: dev, test, uat, prod. \n\nPlease select valid environment to proceed futher\n"
         exit 1
         ;;
 esac

@@ -9,10 +9,6 @@ rules:
       deniedPermissions:
 
       # VM Protections
+        - "compute.googleapis.com/instances.setLabels"
         - "compute.googleapis.com/instances.deleteTagBinding"
        
-      # Disk Protections 
-        - "compute.googleapis.com/disks.deleteTagBinding"
-
-      # Snapshot Protections 
-        - "compute.googleapis.com/snapshots.deleteTagBinding"
