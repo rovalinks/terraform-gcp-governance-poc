@@ -4,7 +4,7 @@ rules:
         - "principalSet://goog/public:all"
 
       exceptionPrincipals:
-        - "principal://goog/subject/rohith555raju@gmail.com"
+        - "principal://goog/subject/ADMIN_EMAIL_PLACEHOLDER"
 
       deniedPermissions:
         - "compute.googleapis.com/disks.create"
