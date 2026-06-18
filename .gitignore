@@ -27,3 +27,5 @@ export_output.txt
 # IDE
 .vscode/
 .idea/
+
+terraform/environments/*/customer.auto.tfvars
