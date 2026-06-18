@@ -9,7 +9,11 @@ echo "=== 🚀 STARTING FULL AUTOMATED COMPLIANCE DEPLOYMENT ==="
 # 1. Configuration & Dynamic Environment Discovery
 # -------------------------------------------------------------------------
 # Change this region value to deploy your infrastructure elsewhere
-export GCP_REGION="europe-west2"
+source scripts/config.sh
+
+export GCP_REGION="${REGION}"
+
+export GOVERNANCE_DATASET="${GOVERNANCE_DATASET}"
 
 export PROJECT_ID=$(gcloud config get-value project)
 export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
@@ -68,7 +72,7 @@ main:
               - compute.googleapis.com/Instance
             outputConfig:
               bigqueryDestination:
-                dataset: "projects/${PROJECT_ID}/datasets/governance_inventory"
+                dataset: "projects/${PROJECT_ID}/datasets/${GOVERNANCE_DATASET}"
                 table: \${"asset_export_" + ts}
                 force: true
         result: exportResult
@@ -87,7 +91,7 @@ main:
     - listTables:
         call: http.get
         args:
-          url: "https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT_ID}/datasets/governance_inventory/tables"
+          url: "https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT_ID}/datasets/${GOVERNANCE_DATASET}/tables"
           auth:
             type: OAuth2
         result: tablesResponse
@@ -130,7 +134,7 @@ main:
             - deleteTable:
                 call: http.delete
                 args:
-                  url: \${"https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT_ID}/datasets/governance_inventory/tables/" + tableId}
+                  url: \${"https://bigquery.googleapis.com/bigquery/v2/projects/${PROJECT_ID}/datasets/${GOVERNANCE_DATASET}/tables/" + tableId}
                   auth:
                     type: OAuth2
 

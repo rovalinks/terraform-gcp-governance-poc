@@ -46,7 +46,7 @@ main:
             - deleteTable:
                 call: http.delete
                 args:
-                  url: ${"https://bigquery.googleapis.com/bigquery/v2/projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory/tables/" + tableId}
+                  url: ${"https://bigquery.googleapis.com/bigquery/v2/__PROJECT_ID__/datasets/__DATASET_NAME__/tables/" + tableId}
                   auth:
                     type: OAuth2
 

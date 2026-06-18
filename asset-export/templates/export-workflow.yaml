@@ -35,7 +35,7 @@ main:
               - compute.googleapis.com/Instance
             outputConfig:
               bigqueryDestination:
-                dataset: "projects/project-a9c3b175-7f78-4ba6-9ad/datasets/governance_inventory"
+                dataset: "projects/__PROJECT_ID__/datasets/__DATASET_NAME__"
                 table: ${"asset_export_" + ts}
                 force: true
         result: exportResult
