@@ -1,579 +1,326 @@
-# GCP Governance PoC Repository Structure
+# Terraform GCP Governance Accelerator
 
-## Repository Overview
+## Overview
 
-This repository demonstrates a cloud-native governance framework implemented using Terraform and native Google Cloud capabilities, eliminating the need for custom applications.
+This repository provides a reusable Google Cloud governance accelerator built using native Google Cloud services and Terraform.
 
-The implementation covers:
+The solution demonstrates how enterprise governance controls can be implemented without custom applications, Cloud Run services, or bespoke code.
 
-* Layer 1 - Preventative Controls
-* Layer 2 - Brownfield Detection
-* Layer 3 - Remediation and Revalidation
+The accelerator is organised into three governance layers:
+
+### Layer 1 - Preventative Governance
+
+Prevents non-compliant resources from being created using:
+
+* Terraform validation
+* Mandatory labels
+* Tag bindings
+* Custom Organisation Policies
+* IAM Deny Policies
+
+### Layer 2 - Brownfield Detection
+
+Identifies existing non-compliant resources using:
+
+* Cloud Asset Inventory
+* BigQuery
+* SQL-based compliance queries
+
+### Layer 3 - Remediation
+
+Demonstrates remediation of non-compliant resources and revalidation of compliance status.
+
+---
+
+# Solution Architecture
+
+```text
+Bootstrap Tags
+      ↓
+
+Terraform Deployment
+      ↓
+
+Labels + Tag Bindings
+      ↓
+
+Custom Organisation Policies
+      ↓
+
+IAM Deny Policies
+      ↓
+
+Cloud Asset Inventory
+      ↓
+
+BigQuery Export
+      ↓
+
+Compliance Detection
+      ↓
+
+Remediation
+      ↓
+
+Revalidation
+```
 
 ---
 
 # Repository Structure
 
 ```text
-terraform-gcp-demo/
+.
+├── asset-export/
 ├── bootstrap/
+│   └── tags/
+├── config/
 ├── docs/
-├── evidence/
-├── findings/
 ├── iam-deny/
+├── modules/
 ├── org-policies/
 ├── scripts/
 ├── terraform/
-├── README.md
-├── terraform.sh
-└── supporting files
+│   └── environments/
+│       ├── dev/
+│       ├── test/
+│       ├── uat/
+│       └── prod/
+└── README.md
 ```
 
 ---
 
-# 1. bootstrap/
+# Prerequisites
 
-Purpose:
+The deployment account requires permissions to manage:
 
-Bootstrap foundational governance artefacts required before enforcement.
+* Google Cloud Tags
+* Organisation Policies
+* IAM Deny Policies
+* BigQuery
+* Cloud Asset Inventory
+* Cloud Workflows
+* Cloud Scheduler
+* Terraform Resources
 
-```text
-bootstrap
-└── tags
-```
+Recommended roles:
 
-Contents:
-
-| File               | Purpose                           |
-| ------------------ | --------------------------------- |
-| list-tags.sh       | Lists all Tag Keys and Tag Values |
-| main.tf            | Creates Tag Keys and Tag Values   |
-| outputs.tf         | Outputs created tag identifiers   |
-| provider.tf        | Provider configuration            |
-| variables.tf       | Input variables                   |
-| versions.tf        | Terraform version constraints     |
-| terraform.tfstate* | Bootstrap state                   |
-
-Responsibilities:
-
-* Create Resource Manager Tag Keys
-* Create approved Tag Values
-* Establish organisation tagging standards
+* Organisation Policy Administrator
+* Tag Administrator
+* Security Admin
+* Project IAM Admin
+* BigQuery Admin
+* Cloud Asset Inventory Admin
+* Workflow Admin
+* Scheduler Admin
 
 ---
 
-# 2. docs/
+# Configuration
 
-Purpose:
+Update the following files before deployment:
 
-Customer-facing documentation.
+## Terraform Configuration
 
 ```text
-docs
-├── layer-1
-├── layer-2
-├── layer-3
-├── Required_Permissions_and_Roles.md
-└── test_cases.md
+config/customer.auto.tfvars
 ```
 
-Contents:
+Example:
 
-Layer 1:
+```hcl
+project_id         = "customer-project"
+project_number     = "123456789"
+org_id             = "123456789012"
 
-Preventative governance controls.
+region             = "europe-west2"
+zone               = "europe-west2-a"
 
-Layer 2:
+environment        = "dev"
 
-Brownfield detection.
+owner              = "platform-team"
+application        = "payments"
 
-Layer 3:
+inventory_dataset  = "governance_inventory"
 
-Remediation lifecycle.
-
-Permissions:
-
-Required IAM roles.
-
-Test Cases:
-
-End-to-end validation evidence.
-
-Responsibilities:
-
-* Operational guidance
-* Customer handover
-* Audit artefacts
-
----
-
-# 3. evidence/
-
-Purpose:
-
-Proof that testing was performed.
-
-```text
-evidence
-├── commands
-├── screenshots
-└── test-results
-```
-
-Contents:
-
-Test outputs:
-
-```text
-application-values.txt
-environment-values.txt
-governance-deny-policies.txt
-owner-values.txt
-tag-bootstrap-output.txt
-tag-keys.txt
-```
-
-Responsibilities:
-
-* Audit evidence
-* Demonstrate outcomes
-* Support customer sign-off
-
----
-
-# 4. findings/
-
-Purpose:
-
-Capture lessons learned and platform limitations.
-
-```text
-findings
-├── enforce-mandatory-labels.yaml
-├── supported-resource-matrix.md
-├── test-results.md
-└── test-update.yaml
-```
-
-Responsibilities:
-
-* Document unsupported scenarios
-* Track discoveries
-* Record validation outcomes
-
-Example Findings:
-
-* Org Policies supported for VMs.
-* Org Policies unsupported for Disks.
-* IAM Deny successfully validated.
-
----
-
-# 5. iam-deny/
-
-Purpose:
-
-Prevent unauthorised actions.
-
-```text
-iam-deny
-├── deny-disk-governance.yaml
-├── deny-snapshot-governance.yaml
-└── deny-vm-governance.yaml
-```
-
-Responsibilities:
-
-Prevent:
-
-```text
-VM creation
-Disk creation
-Snapshot creation
-
-Label modifications
-
-Tag binding changes
-```
-
-Governance Layer:
-
-Layer 1
-
----
-
-# 6. org-policies/
-
-Purpose:
-
-Enforce organisation-wide standards.
-
-```text
-org-policies
-├── custom-constraints
-└── policies
-```
-
-## custom-constraints/
-
-Defines business logic.
-
-Examples:
-
-```text
-environment-label.yaml
-application-label.yaml
-owner-label.yaml
-```
-
-Unsupported experiments:
-
-```text
-unsupported/
-```
-
-Responsibilities:
-
-Validate:
-
-```text
-environment labels
-owner labels
-application labels
+workload_ids = [
+  "01",
+  "02"
+]
 ```
 
 ---
 
-## policies/
-
-Activates constraints.
-
-Examples:
+## Governance Configuration
 
 ```text
-environment-policy.yaml
-application-policy.yaml
-owner-policy.yaml
+scripts/config.sh
 ```
-
-Responsibilities:
-
-Turn constraints into enforcement.
-
-Governance Layer:
-
-Layer 1
-
----
-
-# 7. scripts/
-
-Purpose:
-
-Operational automation.
-
-```text
-scripts
-├── config.sh
-├── delete-all.sh
-├── disable-all.sh
-├── enable-all.sh
-└── verify-all.sh
-```
-
-Responsibilities:
-
-Enable controls:
-
-```text
-./scripts/enable-all.sh
-```
-
-Disable controls:
-
-```text
-./scripts/disable-all.sh
-```
-
-Verification:
-
-```text
-./scripts/verify-all.sh
-```
-
-Cleanup:
-
-```text
-./scripts/delete-all.sh
-```
-
----
-
-# 8. terraform/
-
-Purpose:
-
-Infrastructure-as-Code implementation.
-
-```text
-terraform
-├── environments
-├── modules
-└── state
-```
-
----
-
-## environments/
-
-Environment-specific configurations.
-
-```text
-dev
-test
-uat
-prod
-```
-
-Responsibilities:
-
-Provide:
-
-```text
-environment
-owner
-application
-```
-
-values.
-
----
-
-### dev/
-
-Contains active PoC implementation.
-
-Files:
-
-```text
-main.tf
-variables.tf
-locals.tf
-dev.auto.tfvars
-tag-test.tf
-terraform.tfstate*
-```
-
-Responsibilities:
-
-Deploy:
-
-* VMs
-* Disks
-* Snapshots
-
-Apply:
-
-Mandatory labels.
-
----
-
-# modules/
-
-Reusable infrastructure components.
-
-```text
-compute-instance
-compute-disk
-compute-snapshot
-storage-bucket
-cloud-sql
-tag-bindings
-```
-
-Responsibilities:
-
-Encapsulate governance logic.
-
----
-
-## compute-instance/
-
-Deploy VMs.
-
-Features:
-
-* Mandatory labels
-* Validation
-* Outputs
-
----
-
-## compute-disk/
-
-Deploy disks.
-
-Features:
-
-* Mandatory labels
-* Preconditions
-* Outputs
-
----
-
-## compute-snapshot/
-
-Deploy snapshots.
-
-Features:
-
-* Mandatory labels
-* Outputs
-
----
-
-## tag-bindings/
-
-Resource Manager Tags.
-
-Features:
-
-Attach:
-
-```text
-environment
-owner
-application
-```
-
-tags.
-
----
-
-# state/
-
-Stores Terraform state.
-
-Contents:
-
-```text
-terraform.tfstate
-terraform.tfstate.backup
-```
-
-Responsibilities:
-
-Track deployed infrastructure.
-
----
-
-# Root Files
-
-## terraform.sh
-
-Purpose:
-
-Environment selector.
 
 Example:
 
 ```bash
-./terraform.sh plan
-./terraform.sh apply
-./terraform.sh destroy
+export PROJECT_ID="customer-project"
+
+export PROJECT_NUMBER="123456789"
+
+export ORGANIZATION_ID="123456789012"
+
+export REGION="europe-west2"
+
+export ZONE="europe-west2-a"
+
+export GOVERNANCE_DATASET="governance_inventory"
+
+export GOVERNANCE_ADMIN_EMAIL="admin@customer.com"
 ```
 
-Responsibilities:
+---
 
-Simplify deployments.
+# Deployment Steps
+
+## Step 1 - Bootstrap Tags
+
+```bash
+cd bootstrap/tags
+
+terraform init
+
+terraform apply
+```
+
+This creates:
+
+* Tag Keys
+* Tag Values
 
 ---
 
-## README.md
+## Step 2 - Deploy Terraform Resources
 
-Purpose:
+```bash
+cd terraform/environments/dev
 
-Repository overview.
+./terraform.sh apply
+```
 
-Responsibilities:
+This creates:
 
-Describe:
-
-* Architecture
-* Objectives
-* Findings
-* Outcomes
-
----
-
-## repo_source_dump.txt
-
-Purpose:
-
-Repository snapshot.
-
-Responsibilities:
-
-Documentation and troubleshooting.
+* Compute Instances
+* Persistent Disks
+* Snapshots
+* Labels
+* Tag Bindings
 
 ---
 
-## testdisk.log
+## Step 3 - Enable Governance Controls
 
-Purpose:
+```bash
+./scripts/enable-all.sh
+```
 
-Testing artefact.
+This enables:
 
-Responsibilities:
-
-Historical troubleshooting evidence.
-
----
-
-# Governance Mapping
-
-| Repository Area | Layer 1 | Layer 2 | Layer 3 |
-| --------------- | ------: | ------: | ------: |
-| bootstrap       |       ✓ |         |         |
-| terraform       |       ✓ |         |         |
-| iam-deny        |       ✓ |         |         |
-| org-policies    |       ✓ |         |         |
-| scripts         |       ✓ |         |         |
-| docs/layer-1    |       ✓ |         |         |
-| docs/layer-2    |         |       ✓ |         |
-| docs/layer-3    |         |         |       ✓ |
-| evidence        |       ✓ |       ✓ |       ✓ |
-| findings        |       ✓ |       ✓ |       ✓ |
+* Custom Constraints
+* Organisation Policies
+* IAM Deny Policies
 
 ---
 
-# Final Architecture
+## Step 4 - Deploy Brownfield Detection
+
+```bash
+./asset-export/gcp-cai-lifecycle-manager.sh
+```
+
+This deploys:
+
+* Cloud Workflows
+* Cloud Scheduler
+* Cloud Asset Inventory Export Automation
+
+---
+
+## Step 5 - Execute Validation Tests
+
+Run the validation scenarios documented in:
 
 ```text
-Layer 1
-Prevent
-↓
-Terraform + Org Policies + IAM Deny
-
-Layer 2
-Detect
-↓
-Cloud Asset Inventory + BigQuery
-
-Layer 3
-Remediate
-↓
-Fix Resources + Re-export + Revalidate
+docs/test_cases.md
 ```
 
 ---
 
-# Repository Outcome
+# Governance Layers
 
-This repository demonstrates an end-to-end cloud-native governance framework capable of:
+## Layer 1 - Preventative Governance
 
-* Preventing non-compliant resources.
-* Detecting existing violations.
-* Supporting remediation workflows.
-* Producing audit evidence.
-* Eliminating the need for custom Cloud Run governance applications.
+Validated controls:
+
+* Terraform Validation
+* Mandatory Labels
+* Tag Bindings
+* Custom Organisation Policies
+* IAM Deny Policies
+
+---
+
+## Layer 2 - Brownfield Detection
+
+Validated controls:
+
+* Cloud Asset Inventory Export
+* BigQuery Export
+* Compliance Queries
+* Brownfield Resource Detection
+
+---
+
+## Layer 3 - Remediation
+
+Validated controls:
+
+* Terraform Remediation
+* Native GCP Remediation
+* Compliance Revalidation
+
+---
+
+# Cleanup
+
+Disable governance controls:
+
+```bash
+./scripts/disable-all.sh
+```
+
+Remove governance controls:
+
+```bash
+./scripts/delete-all.sh
+```
+
+Destroy Terraform resources:
+
+```bash
+cd terraform/environments/dev
+
+terraform destroy
+```
+
+---
+
+# Outcome
+
+This accelerator demonstrates a cloud-native governance approach using managed Google Cloud services and Terraform.
+
+The solution provides:
+
+* Preventative governance
+* Brownfield detection
+* Remediation
+* Compliance revalidation
+
+without introducing custom applications or operational overhead.

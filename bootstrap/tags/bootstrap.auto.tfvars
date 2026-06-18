@@ -1,2 +1,2 @@
-project_id = "customer-project"
-org_id     = "123456789012"
+project_id = "project-a9c3b175-7f78-4ba6-9ad"
+org_id     = "321880981428"
