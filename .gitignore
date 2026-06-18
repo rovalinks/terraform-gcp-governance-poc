@@ -1,11 +1,17 @@
-.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-terraform.tfvars
-*.auto.tfvars
-.terraform.lock.hcl
-iam-deny/generated/
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+
+# Generated Files
+asset-export/generated/
 org-policies/generated/
+iam-deny/generated/
+
+# Temporary Files
 export_output.txt
-./export_output.txt
+
+# IDE
+.vscode/
+.idea/
