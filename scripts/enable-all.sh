@@ -13,13 +13,13 @@ echo "Updating Custom Constraints"
 echo "======================================"
 
 gcloud org-policies set-custom-constraint \
-    org-policies/custom-constraints/environment-label.yaml
+    org-policies/generated/custom-constraints/environment-label.yaml
 
 gcloud org-policies set-custom-constraint \
-    org-policies/custom-constraints/application-label.yaml
+    org-policies/generated/custom-constraints/application-label.yaml
 
 gcloud org-policies set-custom-constraint \
-    org-policies/custom-constraints/owner-label.yaml
+    org-policies/generated/custom-constraints/owner-label.yaml
 
 echo ""
 echo "======================================"
@@ -27,13 +27,13 @@ echo "Updating Org Policies"
 echo "======================================"
 
 gcloud org-policies set-policy \
-    org-policies/policies/environment-policy.yaml
+    org-policies/generated/policies/environment-policy.yaml
 
 gcloud org-policies set-policy \
-    org-policies/policies/application-policy.yaml
+    org-policiesgenerated/policies/application-policy.yaml
 
 gcloud org-policies set-policy \
-    org-policies/policies/owner-policy.yaml
+    org-policies/generated/policies/owner-policy.yaml
 
 echo ""
 echo "======================================"
