@@ -45,3 +45,19 @@ variable "workload_ids" {
     error_message = "Workload IDs must be two digits (01, 02, 03)."
   }
 }
+
+variable "project_id" {
+  type = string
+}
+
+variable "project_number" {
+  type = string
+}
+
+variable "region" {
+  type = string
+}
+
+variable "zone" {
+  type = string
+}
