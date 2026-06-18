@@ -2,35 +2,29 @@
 
 set -euo pipefail
 
+# Load environment configurations
 source scripts/config.sh
 
+# Ensure the destination directories exist
 mkdir -p org-policies/generated/custom-constraints
 mkdir -p org-policies/generated/policies
 
 CONFIG_FILE="config/customer.auto.tfvars"
 
-ENVIRONMENT_REGEX=$(awk '
-/environments *= *\[/ {flag=1; next}
-/]/ {flag=0}
-flag {gsub(/"|,| /,""); printf "%s|",$0}
-' "$CONFIG_FILE" | sed 's/|$//')
+# ... (Keep your existing regex generation logic here) ...
 
-OWNER_REGEX=$(awk '
-/owners *= *\[/ {flag=1; next}
-/]/ {flag=0}
-flag {gsub(/"|,| /,""); printf "%s|",$0}
-' "$CONFIG_FILE" | sed 's/|$//')
+# Process template files
+find org-policies/templates -name "*.yaml" | while read -r file; do
+  filename=$(basename "$file")
 
-APPLICATION_REGEX=$(awk '
-/applications *= *\[/ {flag=1; next}
-/]/ {flag=0}
-flag {gsub(/"|,| /,""); printf "%s|",$0}
-' "$CONFIG_FILE" | sed 's/|$//')
+  # Logic: Route based on filename
+  if [[ "$filename" == *"label.yaml" ]]; then
+    target="org-policies/generated/custom-constraints/$filename"
+  else
+    target="org-policies/generated/policies/$filename"
+  fi
 
-find org-policies/templates -name "*.yaml" | while read file
-do
-  target=$(echo "$file" | sed 's/templates/generated/')
-
+  # Apply template substitutions
   sed \
     -e "s/__ORG_ID__/${ORGANIZATION_ID}/g" \
     -e "s/__ENVIRONMENT_REGEX__/${ENVIRONMENT_REGEX}/g" \
@@ -39,9 +33,9 @@ do
     "$file" > "$target"
 done
 
+echo "Policies generated successfully."
 echo ""
 echo "Generated organisation policies."
 echo "Environment Regex : ${ENVIRONMENT_REGEX}"
 echo "Owner Regex       : ${OWNER_REGEX}"
 echo "Application Regex : ${APPLICATION_REGEX}"
-echo ""

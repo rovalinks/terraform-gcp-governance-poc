@@ -65,3 +65,14 @@ export ZONE=$(grep '^zone' "$CONFIG_FILE" | cut -d'"' -f2)
 
 export GOVERNANCE_ADMIN_EMAIL=${GOVERNANCE_ADMIN_EMAIL:-rohith555raju@gmail.com}
 export GOVERNANCE_DATASET=${GOVERNANCE_DATASET:-governance_inventory}
+
+
+# Define your source lists
+ENVIRONMENTS=("dev" "test" "uat" "prod")
+OWNERS=("platform-team" "cloud-team" "security-team" "networking-team")
+APPLICATIONS=("payments" "crm" "analytics" "ecommerce")
+
+# Dynamically join them with a pipe character
+export ENVIRONMENT_REGEX=$(IFS="|"; echo "${ENVIRONMENTS[*]}")
+export OWNER_REGEX=$(IFS="|"; echo "${OWNERS[*]}")
+export APPLICATION_REGEX=$(IFS="|"; echo "${APPLICATIONS[*]}")
