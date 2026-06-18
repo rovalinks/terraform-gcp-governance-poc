@@ -65,7 +65,7 @@ module "legacy_vm_tag_bindings" {
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
     var.project_number,
-    var.zone,,
+    var.zone,
     google_compute_instance.legacy-vm.instance_id
   )
 
@@ -126,11 +126,11 @@ module "vm_tag_bindings" {
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
     var.project_number,
-    var.zone,,
+    var.zone,
     each.value
   )
 
-  location = var.zone,
+  location = var.zone
 
   environment = var.environment
 
@@ -152,11 +152,11 @@ module "disk_tag_bindings" {
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/disks/%s",
     var.project_number,
-    var.zone,,
+    var.zone,
     each.value
   )
 
-  location = var.zone,
+  location = var.zone
 
   environment = var.environment
 
