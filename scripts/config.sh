@@ -58,7 +58,7 @@ export PROJECT_NUMBER=$(gcloud projects describe \
   "$PROJECT_ID" \
   --format="value(projectNumber)")
 
-export ORGANIZATION_ID="123456789012"
+export ORGANIZATION_ID="321880981428"
 export GOVERNANCE_ADMIN_EMAIL="rohith555raju@gmail.com"
 export REGION="europe-west2"
 export ZONE="europe-west2-a"
