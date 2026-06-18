@@ -52,7 +52,7 @@
 # export ZONE="europe-west2-a"
 
 #!/bin/bash
-export PROJECT_ID="project-a9c3b175-7f78-4ba6-9ad
+export PROJECT_ID="project-a9c3b175-7f78-4ba6-9ad"
 
 export PROJECT_NUMBER=$(gcloud projects describe \
   "$PROJECT_ID" \
