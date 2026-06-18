@@ -14,7 +14,7 @@ main:
     - exportAssets:
         call: http.post
         args:
-          url: "https://cloudasset.googleapis.com/v1/projects/project-a9c3b175-7f78-4ba6-9ad:exportAssets"
+          url: "https://cloudasset.googleapis.com/v1/projects/__PROJECT_ID__:exportAssets"
           auth:
             type: OAuth2
           body:

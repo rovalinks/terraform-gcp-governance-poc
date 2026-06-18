@@ -7,5 +7,4 @@ terraform.tfvars
 .terraform.lock.hcl
 iam-deny/generated/
 org-policies/generated/
-*.tfstate*
-*.tfstate*
+export_output.txt
