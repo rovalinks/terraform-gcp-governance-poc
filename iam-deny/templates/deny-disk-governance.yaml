@@ -4,8 +4,8 @@ rules:
         - "principalSet://goog/public:all"
 
       exceptionPrincipals:
-        - "principal://goog/subject/rohith555raju@gmail.com"
+        - "principal://goog/subject/__ADMIN_EMAIL__"
 
       deniedPermissions:
-        - "compute.googleapis.com/disks.create"
+       #- "compute.googleapis.com/disks.create"
         - "compute.googleapis.com/disks.setLabels"

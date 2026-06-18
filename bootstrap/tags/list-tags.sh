@@ -1,5 +1,5 @@
 for KEY in $(gcloud resource-manager tags keys list \
-    --parent=organizations/321880981428 \
+     --parent=organizations/${ORG_ID}
     --format="value(name)"); do
 
   echo

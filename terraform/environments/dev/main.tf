@@ -8,9 +8,9 @@ terraform {
 }
 
 provider "google" {
-  project = "project-a9c3b175-7f78-4ba6-9ad"
-  region  = "europe-west2"
-  zone    = "europe-west2-a"
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
 }
 
 
@@ -64,12 +64,12 @@ module "legacy_vm_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
-    "106228803995",
-    "europe-west2-a",
+    var.project_number,
+    var.zone,
     google_compute_instance.legacy-vm.instance_id
   )
 
-  location = "europe-west2-a"
+  location = var.zone,
 
   environment = var.environment
   owner        = var.owner
@@ -86,7 +86,7 @@ module "compute_disk" {
   application  = var.application
   workload_ids = var.workload_ids
 
-  zone    = "europe-west2-a"
+  zone = var.zone
   size_gb = 10
   type    = "pd-standard"
 
@@ -107,9 +107,9 @@ module "compute_instance" {
   application  = var.application
   workload_ids = var.workload_ids
 
-  project_id = "project-a9c3b175-7f78-4ba6-9ad"
-  region     = "europe-west2"
-  zone       = "europe-west2-a"
+  project_id = var.project_id
+  region     = var.region
+  zone       = var.zone
 }
 
 
@@ -125,12 +125,12 @@ module "vm_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
-    "106228803995",
-    "europe-west2-a",
+    var.project_number,
+    var.zone,
     each.value
   )
 
-  location = "europe-west2-a"
+  location = var.zone
 
   environment = var.environment
 
@@ -151,12 +151,12 @@ module "disk_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/disks/%s",
-    "106228803995",
-    "europe-west2-a",
+    var.project_number,
+    var.zone,
     each.value
   )
 
-  location = "europe-west2-a"
+  location = var.zone
 
   environment = var.environment
 
@@ -178,7 +178,7 @@ module "snapshot_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/global/snapshots/%s",
-    "106228803995",
+    var.project_number,
     each.value
   )
 
@@ -199,7 +199,7 @@ module "snapshot_tag_bindings" {
 
 #   parent = format(
 #     "//compute.googleapis.com/projects/%s/global/snapshots/%s",
-#     "106228803995",
+#     var.project_number,
 #     each.value
 #   )
 
@@ -237,7 +237,7 @@ resource "google_bigquery_dataset" "governance_inventory1" {
 
 resource "google_bigquery_dataset" "governance_inventory1" {
   dataset_id = "governance_inventory1"
-  location   = "europe-west2"
+  location = var.region
 
   labels = {
     environment = var.environment
@@ -248,5 +248,5 @@ resource "google_bigquery_dataset" "governance_inventory1" {
 
 resource "google_bigquery_dataset" "governance_inventory2" {
   dataset_id = "governance_inventory2"
-  location   = "europe-west2"
+  location = var.region
 }

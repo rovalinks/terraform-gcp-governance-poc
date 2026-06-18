@@ -5,7 +5,7 @@ data "google_project" "current" {}
 locals {
   # FIX: path.module targets terraform/environments/dev/
   # Walking up 3 levels brings us out to the repository root where iam-deny/ sits
-  deny_config_path = "${path.module}/../../../iam-deny/deny-tagbinding-governance.yaml"
+  deny_config_path = "${path.module}/../../../iam-deny/templates/deny-tagbinding-governance.yaml"
   deny_config      = yamldecode(file(local.deny_config_path))
 }
 

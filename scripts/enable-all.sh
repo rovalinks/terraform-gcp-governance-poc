@@ -3,6 +3,11 @@ set -euo pipefail
 
 source "$(dirname "$0")/config.sh"
 
+echo "Generating customer-specific governance files..."
+
+./scripts/generate-org-policies.sh
+./scripts/generate-deny-policies.sh
+
 echo "======================================"
 echo "Enabling Governance Controls"
 echo "======================================"
@@ -13,13 +18,13 @@ echo "Updating Custom Constraints"
 echo "======================================"
 
 gcloud org-policies set-custom-constraint \
-    org-policies/custom-constraints/environment-label.yaml
+    org-policies/generated/custom-constraints/environment-label.yaml
 
 gcloud org-policies set-custom-constraint \
-    org-policies/custom-constraints/application-label.yaml
+    org-policies/generated/custom-constraints/application-label.yaml
 
 gcloud org-policies set-custom-constraint \
-    org-policies/custom-constraints/owner-label.yaml
+    org-policies/generated/custom-constraints/owner-label.yaml
 
 echo ""
 echo "======================================"
@@ -27,13 +32,13 @@ echo "Updating Org Policies"
 echo "======================================"
 
 gcloud org-policies set-policy \
-    org-policies/policies/environment-policy.yaml
+    org-policies/generated/policies/environment-policy.yaml
 
 gcloud org-policies set-policy \
-    org-policies/policies/application-policy.yaml
+    org-policies/generated/policies/application-policy.yaml
 
 gcloud org-policies set-policy \
-    org-policies/policies/owner-policy.yaml
+    org-policies/generated/policies/owner-policy.yaml
 
 echo ""
 echo "======================================"
@@ -63,15 +68,15 @@ create_deny_policy() {
 
 create_deny_policy \
     "deny-vm-governance" \
-    "iam-deny/deny-vm-governance.yaml"
+    "iam-deny/generated/deny-vm-governance.yaml"
 
 create_deny_policy \
     "deny-disk-governance" \
-    "iam-deny/deny-disk-governance.yaml"
+    "iam-deny/generated/deny-disk-governance.yaml"
 
 create_deny_policy \
     "deny-snapshot-governance" \
-    "iam-deny/deny-snapshot-governance.yaml"
+    "iam-deny/generated/deny-snapshot-governance.yaml"
 
 echo ""
 echo "======================================"
