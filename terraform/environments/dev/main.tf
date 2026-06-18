@@ -130,6 +130,8 @@ module "vm_tag_bindings" {
     each.value
   )
 
+  org_id = var.org_id
+  
   location = var.zone
 
   environment = var.environment
@@ -156,6 +158,8 @@ module "disk_tag_bindings" {
     each.value
   )
 
+  org_id = var.org_id
+  
   location = var.zone
 
   environment = var.environment
@@ -181,6 +185,8 @@ module "snapshot_tag_bindings" {
     var.project_number,
     each.value
   )
+
+  org_id = var.org_id
 
   location = "global"
 

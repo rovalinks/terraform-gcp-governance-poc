@@ -5,19 +5,19 @@
 resource "google_tags_tag_binding" "environment_global" {
   count     = lower(trimspace(var.location)) == "global" ? 1 : 0
   parent    = var.parent
-  tag_value = local.environment_tag_map[lower(trimspace(var.environment))]
+  tag_value = data.google_tags_tag_value.environment.name
 }
 
 resource "google_tags_tag_binding" "owner_global" {
   count     = lower(trimspace(var.location)) == "global" ? 1 : 0
   parent    = var.parent
-  tag_value = local.owner_tag_map[lower(trimspace(var.owner))]
+  tag_value = data.google_tags_tag_value.owner.name
 }
 
 resource "google_tags_tag_binding" "application_global" {
   count     = lower(trimspace(var.location)) == "global" ? 1 : 0
   parent    = var.parent
-  tag_value = local.application_tag_map[lower(trimspace(var.application))]
+  tag_value = data.google_tags_tag_value.application.name
 }
 
 # ==========================================
@@ -27,19 +27,19 @@ resource "google_tags_location_tag_binding" "environment" {
   count     = lower(trimspace(var.location)) != "global" ? 1 : 0
   location  = var.location
   parent    = var.parent
-  tag_value = local.environment_tag_map[lower(trimspace(var.environment))]
+  tag_value = data.google_tags_tag_value.environment.name
 }
 
 resource "google_tags_location_tag_binding" "owner" {
   count     = lower(trimspace(var.location)) != "global" ? 1 : 0
   location  = var.location
   parent    = var.parent
-  tag_value = local.owner_tag_map[lower(trimspace(var.owner))]
+  tag_value = data.google_tags_tag_value.owner.name
 }
 
 resource "google_tags_location_tag_binding" "application" {
   count     = lower(trimspace(var.location)) != "global" ? 1 : 0
   location  = var.location
   parent    = var.parent
-  tag_value = local.application_tag_map[lower(trimspace(var.application))]
+  tag_value = data.google_tags_tag_value.application.name
 }
