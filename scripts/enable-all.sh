@@ -3,6 +3,11 @@ set -euo pipefail
 
 source "$(dirname "$0")/config.sh"
 
+echo "Generating customer-specific governance files..."
+
+./scripts/generate-org-policies.sh
+./scripts/generate-deny-policies.sh
+
 echo "======================================"
 echo "Enabling Governance Controls"
 echo "======================================"
@@ -63,15 +68,15 @@ create_deny_policy() {
 
 create_deny_policy \
     "deny-vm-governance" \
-    "iam-deny/deny-vm-governance.yaml"
+    "iam-deny/generated/deny-vm-governance.yaml"
 
 create_deny_policy \
     "deny-disk-governance" \
-    "iam-deny/deny-disk-governance.yaml"
+    "iam-deny/generated/deny-disk-governance.yaml"
 
 create_deny_policy \
     "deny-snapshot-governance" \
-    "iam-deny/deny-snapshot-governance.yaml"
+    "iam-deny/generated/deny-snapshot-governance.yaml"
 
 echo ""
 echo "======================================"
