@@ -6,7 +6,7 @@ rules:
 
       # FIX: The exact format for an individual user exception
       exceptionPrincipals:
-        - "principal://goog/subject/ADMIN_EMAIL_PLACEHOLDER"
+        - "principal://goog/subject/__ADMIN_EMAIL__"
 
       # Clear, isolated compute permissions
       deniedPermissions:

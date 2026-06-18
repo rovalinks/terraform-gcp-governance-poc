@@ -4,11 +4,11 @@ rules:
         - "principalSet://goog/public:all"
 
       exceptionPrincipals:
-        - "principal://goog/subject/ADMIN_EMAIL_PLACEHOLDER"
+        - "principal://goog/subject/__ADMIN_EMAIL__"
 
       deniedPermissions:
 
       # VM Protections
+      # - "compute.googleapis.com/instances.create"
         - "compute.googleapis.com/instances.setLabels"
-        - "compute.googleapis.com/instances.deleteTagBinding"
        
