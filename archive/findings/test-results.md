@@ -15,5 +15,4 @@
   - google_tags_tag_binding
   - google_tags_location_tag_binding
   could not be completed due to provider behaviour inconsistencies observed with Google Provider v6.50.0.
-- The PoC successfully demonstrated the capability using native GCP tooling without custom applications.
-
+- The PoC successfully demonstrated the capability using native GCP tooling without custom applications
