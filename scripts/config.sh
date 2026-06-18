@@ -52,14 +52,16 @@
 # export ZONE="europe-west2-a"
 
 #!/bin/bash
-export PROJECT_ID="project-a9c3b175-7f78-4ba6-9ad"
 
-export PROJECT_NUMBER=$(gcloud projects describe \
-  "$PROJECT_ID" \
-  --format="value(projectNumber)")
+set -euo pipefail
 
-export ORGANIZATION_ID="321880981428"
-export GOVERNANCE_ADMIN_EMAIL="rohith555raju@gmail.com"
-export REGION="europe-west2"
-export ZONE="europe-west2-a"
-export GOVERNANCE_DATASET="governance_inventory"
+CONFIG_FILE="$(dirname "$0")/../config/customer.auto.tfvars"
+
+export PROJECT_ID=$(grep '^project_id' "$CONFIG_FILE" | cut -d'"' -f2)
+export PROJECT_NUMBER=$(grep '^project_number' "$CONFIG_FILE" | cut -d'"' -f2)
+export ORGANIZATION_ID=$(grep '^org_id' "$CONFIG_FILE" | cut -d'"' -f2)
+export REGION=$(grep '^region' "$CONFIG_FILE" | cut -d'"' -f2)
+export ZONE=$(grep '^zone' "$CONFIG_FILE" | cut -d'"' -f2)
+
+export GOVERNANCE_ADMIN_EMAIL=${GOVERNANCE_ADMIN_EMAIL:-rohith555raju@gmail.com}
+export GOVERNANCE_DATASET=${GOVERNANCE_DATASET:-governance_inventory}
