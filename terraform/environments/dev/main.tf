@@ -125,7 +125,7 @@ module "vm_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
-    "106228803995",
+    var.project_number,
     "europe-west2-a",
     each.value
   )
@@ -151,7 +151,7 @@ module "disk_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/disks/%s",
-    "106228803995",
+    var.project_number,
     "europe-west2-a",
     each.value
   )
@@ -178,7 +178,7 @@ module "snapshot_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/global/snapshots/%s",
-    "106228803995",
+    var.project_number,
     each.value
   )
 
