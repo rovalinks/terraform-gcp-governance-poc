@@ -1,0 +1,5 @@
+name: organizations/__ORG_ID__/policies/custom.requireApplicationLabels
+
+spec:
+  rules:
+  - enforce: true

@@ -1,0 +1,5 @@
+name: organizations/__ORG_ID__/policies/custom.requireBucketLabels
+
+spec:
+  rules:
+    - enforce: true

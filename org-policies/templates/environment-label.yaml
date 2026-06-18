@@ -1,4 +1,4 @@
-name: organizations/321880981428/customConstraints/custom.requireEnvironmentLabels
+name: organizations/__ORG_ID__/customConstraints/custom.requireEnvironmentLabels
 resourceTypes:
 - compute.googleapis.com/Instance
 methodTypes:
