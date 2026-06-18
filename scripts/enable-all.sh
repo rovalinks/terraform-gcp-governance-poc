@@ -30,7 +30,7 @@ gcloud org-policies set-policy \
     org-policies/generated/policies/environment-policy.yaml
 
 gcloud org-policies set-policy \
-    org-policiesgenerated/policies/application-policy.yaml
+    org-policies/generated/policies/application-policy.yaml
 
 gcloud org-policies set-policy \
     org-policies/generated/policies/owner-policy.yaml
