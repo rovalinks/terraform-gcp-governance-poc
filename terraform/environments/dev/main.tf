@@ -64,12 +64,12 @@ module "legacy_vm_tag_bindings" {
 
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
-    "106228803995",
-    "europe-west2-a",
+    var.project_number,
+    var.zone,,
     google_compute_instance.legacy-vm.instance_id
   )
 
-  location = "europe-west2-a"
+  location = var.zone,
 
   environment = var.environment
   owner        = var.owner
@@ -126,11 +126,11 @@ module "vm_tag_bindings" {
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/instances/%s",
     var.project_number,
-    "europe-west2-a",
+    var.zone,,
     each.value
   )
 
-  location = "europe-west2-a"
+  location = var.zone,
 
   environment = var.environment
 
@@ -152,11 +152,11 @@ module "disk_tag_bindings" {
   parent = format(
     "//compute.googleapis.com/projects/%s/zones/%s/disks/%s",
     var.project_number,
-    "europe-west2-a",
+    var.zone,,
     each.value
   )
 
-  location = "europe-west2-a"
+  location = var.zone,
 
   environment = var.environment
 
@@ -199,7 +199,7 @@ module "snapshot_tag_bindings" {
 
 #   parent = format(
 #     "//compute.googleapis.com/projects/%s/global/snapshots/%s",
-#     "106228803995",
+#     var.project_number,
 #     each.value
 #   )
 
