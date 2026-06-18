@@ -1,9 +1,19 @@
 name: organizations/__ORG_ID__/customConstraints/custom.requireApplicationLabels
+
 resourceTypes:
 - compute.googleapis.com/Instance
+
 methodTypes:
 - CREATE
-condition: "!('application' in resource.labels)"
+
+condition: |
+  !(
+    'application' in resource.labels &&
+    resource.labels.application.matches('^(__APPLICATION_REGEX__)$')
+  )
+
 actionType: DENY
-displayName: Require Application Label
-description: Deny VM creation because the required label 'application' is missing.
+
+displayName: Require Valid Application Label
+
+description: Deny VM creation unless application label contains an approved value.

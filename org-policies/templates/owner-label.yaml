@@ -1,9 +1,19 @@
 name: organizations/__ORG_ID__/customConstraints/custom.requireOwnerLabels
+
 resourceTypes:
 - compute.googleapis.com/Instance
+
 methodTypes:
 - CREATE
-condition: "!('owner' in resource.labels)"
+
+condition: |
+  !(
+    'owner' in resource.labels &&
+    resource.labels.owner.matches('^(__OWNER_REGEX__)$')
+  )
+
 actionType: DENY
-displayName: Require Owner Label
-description: Deny VM creation because the required label 'owner' is missing.
+
+displayName: Require Valid Owner Label
+
+description: Deny VM creation unless owner label contains an approved value.
