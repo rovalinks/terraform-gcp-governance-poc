@@ -86,7 +86,7 @@ module "compute_disk" {
   application  = var.application
   workload_ids = var.workload_ids
 
-  zone    = "europe-west2-a"
+  zone = var.zone
   size_gb = 10
   type    = "pd-standard"
 
@@ -107,9 +107,9 @@ module "compute_instance" {
   application  = var.application
   workload_ids = var.workload_ids
 
-  project_id = "project-a9c3b175-7f78-4ba6-9ad"
-  region     = "europe-west2"
-  zone       = "europe-west2-a"
+  project_id = var.project_id
+  region     = var.region
+  zone       = var.zone
 }
 
 
@@ -237,7 +237,7 @@ resource "google_bigquery_dataset" "governance_inventory1" {
 
 resource "google_bigquery_dataset" "governance_inventory1" {
   dataset_id = "governance_inventory1"
-  location   = "europe-west2"
+  location = var.region
 
   labels = {
     environment = var.environment
@@ -248,5 +248,5 @@ resource "google_bigquery_dataset" "governance_inventory1" {
 
 resource "google_bigquery_dataset" "governance_inventory2" {
   dataset_id = "governance_inventory2"
-  location   = "europe-west2"
+  location = var.region
 }
