@@ -1,3 +1,5 @@
+#Note Run only once
+
 1. Update bootstrap.auto.tfvars
 
 2. Run:
