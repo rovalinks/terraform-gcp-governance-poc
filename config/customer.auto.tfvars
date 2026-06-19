@@ -4,4 +4,4 @@ project_number = "106228803995"
 region         = "europe-west2"
 zone           = "europe-west2-a"
 
-__ADMIN_EMAIL__ = "rohith555raju@gmail.com"
+//__ADMIN_EMAIL__ = "rohith555raju@gmail.com"
