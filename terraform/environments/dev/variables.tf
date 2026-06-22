@@ -65,3 +65,7 @@ variable "region" {
 variable "zone" {
   type = string
 }
+
+variable "admin_email" {
+  type = string
+}
