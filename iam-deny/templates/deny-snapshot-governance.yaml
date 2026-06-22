@@ -4,7 +4,7 @@ rules:
         - "principalSet://goog/public:all"
 
       exceptionPrincipals:
-        - "principal://goog/subject/___ADMIN_EMAIL__"
+        - "principal://goog/subject/__ADMIN_EMAIL__"
 
       deniedPermissions:
        #- "compute.googleapis.com/snapshots.create"
