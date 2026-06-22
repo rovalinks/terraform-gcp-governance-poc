@@ -240,7 +240,6 @@ resource "google_bigquery_dataset" "governance_inventory1" {
 
   }
 */
-
 resource "google_bigquery_dataset" "governance_inventory1" {
   dataset_id = "governance_inventory1"
   location = var.region
