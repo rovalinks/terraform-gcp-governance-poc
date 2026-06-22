@@ -66,6 +66,6 @@ variable "zone" {
   type = string
 }
 
-variable "admin_email" {
+variable "__ADMIN_EMAIL__" {
   type = string
 }

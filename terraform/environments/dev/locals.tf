@@ -4,5 +4,5 @@ locals {
     owner        = var.owner
     application  = var.application
   }
-  admin_principal = "principal://goog/subject/${var.admin_email}"
+  admin_principal = "principal://goog/subject/${var.__ADMIN_EMAIL__}"
 }
