@@ -13,3 +13,9 @@ variable "application" {
 variable "workload_ids" {
   type = set(string)
 }
+
+variable "labels" {
+  description = "Governance labels"
+  type        = map(string)
+  default     = {}
+}

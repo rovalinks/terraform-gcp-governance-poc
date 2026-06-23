@@ -52,3 +52,9 @@ variable "image" {
   type    = string
   default = "debian-cloud/debian-12"
 }
+
+variable "labels" {
+  description = "Governance labels"
+  type        = map(string)
+  default     = {}
+}

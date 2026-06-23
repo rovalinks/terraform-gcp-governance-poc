@@ -1,11 +1,3 @@
-locals {
-  mandatory_labels = {
-    environment = var.environment
-    owner        = var.owner
-    application  = var.application
-  }
-}
-
 resource "google_compute_snapshot" "this" {
 
   for_each = var.workload_ids
@@ -24,5 +16,5 @@ resource "google_compute_snapshot" "this" {
   each.value
  ) 
 
-  labels = local.mandatory_labels
+  labels = var.labels
 }

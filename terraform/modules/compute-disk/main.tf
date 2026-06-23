@@ -1,11 +1,3 @@
-locals {
-  mandatory_labels = {
-    environment = var.environment
-    owner        = var.owner
-    application  = var.application
-  }
-}
-
 resource "google_compute_disk" "this" {
 
   for_each = var.workload_ids
@@ -24,14 +16,14 @@ resource "google_compute_disk" "this" {
 
   image = var.image
 
-  labels = local.mandatory_labels
+  labels = var.labels
 
   lifecycle {
     precondition {
       condition = alltrue([
-        contains(keys(local.mandatory_labels), "environment"),
-        contains(keys(local.mandatory_labels), "owner"),
-        contains(keys(local.mandatory_labels), "application")
+        contains(keys(var.labels), "environment"),
+        contains(keys(var.labels), "owner"),
+        contains(keys(var.labels), "application")
       ])
 
       error_message = "Mandatory labels environment, owner and application are required."

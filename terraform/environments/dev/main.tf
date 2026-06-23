@@ -85,6 +85,8 @@ module "compute_disk" {
   owner        = var.owner
   application  = var.application
   workload_ids = var.workload_ids
+  
+  labels = local.mandatory_labels
 
   zone = var.zone
   size_gb = 10
@@ -233,6 +235,8 @@ module "compute_snapshot" {
   owner        = var.owner
   application  = var.application
   workload_ids = var.workload_ids
+
+  labels = local.mandatory_labels
 }
 
 
@@ -251,7 +255,10 @@ resource "google_bigquery_dataset" "governance_inventory1" {
     environment = var.environment
     owner        = var.owner
     application  = var.application
+    labels = local.mandatory_labels
   }
+
+  
 }
 
 resource "google_bigquery_dataset" "governance_inventory2" {
