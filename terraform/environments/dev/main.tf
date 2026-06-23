@@ -105,7 +105,10 @@ module "compute_instance" {
   environment = var.environment
   owner        = var.owner
   application  = var.application
+
   workload_ids = var.workload_ids
+
+  labels = local.mandatory_labels
 
   project_id = var.project_id
   region     = var.region
