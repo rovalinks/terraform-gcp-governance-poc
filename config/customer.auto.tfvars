@@ -6,3 +6,8 @@ zone           = "europe-west2-a"
 
 __ADMIN_EMAIL__ = "rohith555raju@gmail.com"
 
+governance_labels = {
+  environment = "dev"
+  owner       = "kumar"
+  application = "dev-tagging"
+}
