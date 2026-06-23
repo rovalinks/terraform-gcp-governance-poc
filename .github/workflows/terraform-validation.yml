@@ -1,4 +1,4 @@
-name: Terraform Validation
+name: Terraform_Validation
 
 on:
   pull_request:
