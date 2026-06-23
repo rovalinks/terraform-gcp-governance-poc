@@ -15,17 +15,17 @@ resource "google_compute_instance" "this" {
 
   labels = var.labels
 
-boot_disk {
+  boot_disk {
 
-  source = format(
-    "%s-%s-disk-%s",
-    var.environment,
-    var.application,
-    each.value
-  )
+    source = format(
+      "%s-%s-disk-%s",
+      var.environment,
+      var.application,
+      each.value
+    )
 
-  auto_delete = false
-}
+    auto_delete = false
+  }
 
   network_interface {
     network = "default"

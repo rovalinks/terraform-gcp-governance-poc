@@ -81,12 +81,12 @@ module "compute_disk" {
 
   source = "../../modules/compute-disk"
 
-  environment = var.environment
+  environment  = var.environment
   owner        = var.owner
   application  = var.application
   workload_ids = var.workload_ids
 
-  zone = var.zone
+  zone    = var.zone
   size_gb = 10
   type    = "pd-standard"
 
@@ -102,7 +102,7 @@ module "compute_instance" {
 
   source = "../../modules/compute-instance"
 
-  environment = var.environment
+  environment  = var.environment
   owner        = var.owner
   application  = var.application
   workload_ids = var.workload_ids
@@ -131,7 +131,7 @@ module "vm_tag_bindings" {
   )
 
   org_id = var.org_id
-  
+
   location = var.zone
 
   environment = var.environment
@@ -159,7 +159,7 @@ module "disk_tag_bindings" {
   )
 
   org_id = var.org_id
-  
+
   location = var.zone
 
   environment = var.environment
@@ -192,7 +192,7 @@ module "snapshot_tag_bindings" {
 
   environment = var.environment
 
-  owner    = var.owner
+  owner = var.owner
 
   application = var.application
 }
@@ -226,7 +226,7 @@ module "compute_snapshot" {
     module.compute_instance
   ]
 
-  environment = var.environment
+  environment  = var.environment
   owner        = var.owner
   application  = var.application
   workload_ids = var.workload_ids
@@ -243,16 +243,16 @@ resource "google_bigquery_dataset" "governance_inventory1" {
 
 resource "google_bigquery_dataset" "governance_inventory1" {
   dataset_id = "governance_inventory1"
-  location = var.region
+  location   = var.region
 
   labels = {
     environment = var.environment
-    owner        = var.owner
-    application  = var.application
+    owner       = var.owner
+    application = var.application
   }
 }
 
 resource "google_bigquery_dataset" "governance_inventory2" {
   dataset_id = "governance_inventory2"
-  location = var.region
+  location   = var.region
 }

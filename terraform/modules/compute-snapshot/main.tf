@@ -10,11 +10,11 @@ resource "google_compute_snapshot" "this" {
   )
 
   source_disk = format(
-  "%s-%s-disk-%s",
-  var.environment,
-  var.application,
-  each.value
- ) 
+    "%s-%s-disk-%s",
+    var.environment,
+    var.application,
+    each.value
+  )
 
   labels = var.labels
 }

@@ -12,10 +12,10 @@ locals {
 # Native IAM Deny Policy deployment for Tag and Instance Governance
 resource "google_iam_deny_policy" "deny_tagbinding_governance" {
   provider = google-beta
-  
+
   # FIX: Dynamically interpolates the Project Number from the data source and wraps it inside urlencode()
   parent = urlencode("cloudresourcemanager.googleapis.com/projects/${data.google_project.current.number}")
-  
+
   name         = "deny-tagbinding-governance"
   display_name = "Guardrail: Prevent Tag Removal (From YAML File)"
 
@@ -29,7 +29,7 @@ resource "google_iam_deny_policy" "deny_tagbinding_governance" {
         denied_principals    = rules.value.denyRule.deniedPrincipals
         exception_principals = lookup(rules.value.denyRule, "exceptionPrincipals", [])
         denied_permissions   = rules.value.denyRule.deniedPermissions
-        
+
         dynamic "denial_condition" {
           for_each = lookup(rules.value.denyRule, "denialCondition", null) != null ? [rules.value.denyRule.denialCondition] : []
           content {
