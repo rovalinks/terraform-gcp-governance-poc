@@ -1,4 +1,4 @@
-name: Terraform Validation
+name: Terraform_Validation
 
 on:
   pull_request:
@@ -35,3 +35,4 @@ jobs:
 
       - name: Run TFLint
         run: tflint --recursive
+EOF
