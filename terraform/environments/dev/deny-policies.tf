@@ -64,7 +64,7 @@ resource "google_iam_deny_policy" "deny_policies" {
           ) != null ? [rules.value.denyRule.denialCondition] : []
 
           content {
-            title       = denial_condition.value.title
+            title = denial_condition.value.title
             description = lookup(
               denial_condition.value,
               "description",
