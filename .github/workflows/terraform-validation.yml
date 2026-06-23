@@ -1,7 +1,4 @@
-rm -f .github/workflows/terraform-validation.yml
-
-cat > .github/workflows/terraform-validation.yml <<'EOF'
-name: Terraform_Validation
+name: Terraform Validation
 
 on:
   pull_request:
@@ -38,4 +35,3 @@ jobs:
 
       - name: Run TFLint
         run: tflint --recursive
-EOF
