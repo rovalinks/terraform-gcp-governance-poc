@@ -12,7 +12,6 @@ jobs:
 validate:
 runs-on: ubuntu-latest
 
-```
 defaults:
   run:
     shell: bash
