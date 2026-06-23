@@ -51,11 +51,13 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform/environments/dev
+        env:
+           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+           TF_VAR_project_number: ${{ secrets.GCP_PROJECT_NUMBER }}
+           TF_VAR_org_id: ${{ secrets.GCP_ORG_ID }}
+           TF_VAR___ADMIN_EMAIL__: ${{ secrets.ADMIN_EMAIL }}
         run: |
-          terraform plan \
-            -var-file="customer.auto.tfvars" \
-            -var-file="dev.auto.tfvars" \
-            -out=tfplan
+          terraform plan -out=tfplan
 
       - name: Export Terraform Plan JSON
         working-directory: terraform/environments/dev
