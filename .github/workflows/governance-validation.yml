@@ -51,6 +51,8 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform/environments/dev
+        env:
+          TF_VAR___ADMIN_EMAIL__: ${{ secrets.ADMIN_EMAIL }}
         run: |
           terraform plan -out=tfplan
 
