@@ -1,37 +1,41 @@
 name: Governance Validation
 
 on:
-  push:
-    branches:
-      - governance-pipeline-poc
-
   pull_request:
     branches:
       - main
 
+  push:
+    branches:
+      - governance-pipeline-poc
+
 jobs:
 
-  terraform-validation:
+  validate:
 
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: terraform/environments/dev
-
     steps:
 
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
         run: terraform init
+        working-directory: terraform/environments/dev
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: terraform/environments/dev
+
+      - name: Run TFLint
+        run: tflint --recursive
