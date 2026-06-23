@@ -258,3 +258,21 @@ resource "google_bigquery_dataset" "governance_inventory2" {
   dataset_id = "governance_inventory2"
   location   = var.region
 }
+
+resource "google_compute_instance" "bad_vm" {
+
+  name         = "bad-vm"
+  machine_type = "e2-micro"
+  zone         = "europe-west2-a"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+}
