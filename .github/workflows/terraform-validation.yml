@@ -1,7 +1,7 @@
 rm -f .github/workflows/terraform-validation.yml
 
 cat > .github/workflows/terraform-validation.yml <<'EOF'
-name: Terraform Validation
+name: Terraform_Validation
 
 on:
   pull_request:
