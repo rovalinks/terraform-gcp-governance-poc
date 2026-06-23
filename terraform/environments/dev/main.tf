@@ -258,3 +258,4 @@ resource "google_bigquery_dataset" "governance_inventory2" {
   dataset_id = "governance_inventory2"
   location   = var.region
 }
+
