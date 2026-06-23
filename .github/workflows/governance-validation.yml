@@ -39,3 +39,12 @@ jobs:
 
       - name: Run TFLint
         run: tflint --recursive
+
+      - name: Install Conftest
+        run: |
+          wget https://github.com/open-policy-agent/conftest/releases/download/v0.59.0/conftest_0.59.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.59.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin/
+
+      - name: Verify Conftest
+        run: conftest --version
