@@ -1,94 +1,87 @@
 name: Governance Validation
 
 on:
-pull_request:
-branches:
-- main
+  pull_request:
+    branches:
+      - main
 
-push:
-branches:
-- governance-pipeline-poc
+  push:
+    branches:
+      - governance-pipeline-poc
 
 permissions:
-contents: read
-id-token: write
+  contents: read
+  id-token: write
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
 
-validate:
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-runs-on: ubuntu-latest
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
-steps:
+      - name: Setup GCloud
+        uses: google-github-actions/setup-gcloud@v2
 
-  - name: Checkout Code
-    uses: actions/checkout@v4
+      - name: Verify GCP Authentication
+        run: |
+          gcloud auth list
+          gcloud config list project
 
-  - name: Authenticate to Google Cloud
-    uses: google-github-actions/auth@v2
-    with:
-      workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-  - name: Setup GCloud
-    uses: google-github-actions/setup-gcloud@v2
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
 
-  - name: Verify Authentication
-    run: |
-      gcloud auth list
-      gcloud projects describe project-a9c3b175-7f78-4ba6-9ad --format="value(projectNumber)"
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
 
-  - name: Setup Terraform
-    uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        working-directory: terraform/environments/dev
+        run: terraform init
 
-  - name: Setup TFLint
-    uses: terraform-linters/setup-tflint@v4
+      - name: Terraform Validate
+        working-directory: terraform/environments/dev
+        run: terraform validate
 
-  - name: Terraform Format Check
-    run: terraform fmt -check -recursive
+      - name: Run TFLint
+        run: tflint --recursive || true
 
-  - name: Terraform Init
-    working-directory: terraform/environments/dev
-    run: terraform init
+      - name: Install Conftest
+        run: |
+          wget https://github.com/open-policy-agent/conftest/releases/download/v0.59.0/conftest_0.59.0_Linux_x86_64.tar.gz
+          tar xzf conftest_0.59.0_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin/
 
-  - name: Terraform Validate
-    working-directory: terraform/environments/dev
-    run: terraform validate
+      - name: Verify Conftest
+        run: conftest --version
 
-  - name: Run TFLint
-    run: tflint --recursive || true
+      - name: Terraform Plan
+        working-directory: terraform/environments/dev
+        env:
+          TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+          TF_VAR_project_number: ${{ secrets.GCP_PROJECT_NUMBER }}
+          TF_VAR_org_id: ${{ secrets.GCP_ORG_ID }}
+          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE }}
+          TF_VAR___ADMIN_EMAIL__: ${{ secrets.ADMIN_EMAIL }}
+        run: |
+          terraform plan -out=tfplan
 
-  - name: Install Conftest
-    run: |
-      wget https://github.com/open-policy-agent/conftest/releases/download/v0.59.0/conftest_0.59.0_Linux_x86_64.tar.gz
-      tar xzf conftest_0.59.0_Linux_x86_64.tar.gz
-      sudo mv conftest /usr/local/bin/
+      - name: Export Terraform Plan JSON
+        working-directory: terraform/environments/dev
+        run: |
+          terraform show -json tfplan > tfplan.json
 
-  - name: Verify Conftest
-    run: conftest --version
-
-  - name: Terraform Plan
-    working-directory: terraform/environments/dev
-    env:
-      TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-      TF_VAR_project_number: ${{ secrets.GCP_PROJECT_NUMBER }}
-      TF_VAR_org_id: ${{ secrets.GCP_ORG_ID }}
-      TF_VAR_region: ${{ secrets.GCP_REGION }}
-      TF_VAR_zone: ${{ secrets.GCP_ZONE }}
-      TF_VAR___ADMIN_EMAIL__: ${{ secrets.ADMIN_EMAIL }}
-    run: |
-      terraform plan \
-        -var-file="customer.auto.tfvars" \
-        -var-file="dev.auto.tfvars" \
-        -out=tfplan
-
-  - name: Export Terraform Plan JSON
-    working-directory: terraform/environments/dev
-    run: |
-      terraform show -json tfplan > tfplan.json
-
-  - name: Run Governance Policies
-    working-directory: terraform/environments/dev
-    run: |
-      conftest test tfplan.json \
-        --policy ../../../policy
+      - name: Run Governance Policies
+        working-directory: terraform/environments/dev
+        run: |
+          conftest test tfplan.json --policy ../../../policy
