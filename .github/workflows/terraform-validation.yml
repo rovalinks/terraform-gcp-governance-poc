@@ -57,3 +57,4 @@ steps:
     run: |
       conftest test tfplan.json \
         --policy ../../../policy
+
