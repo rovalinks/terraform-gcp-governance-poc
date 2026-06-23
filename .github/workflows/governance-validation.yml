@@ -1,23 +1,27 @@
-name: Terraform Validation
+name: Governance Validation
 
 on:
-  pull_request:
-    branches:
-      - main
-
   push:
     branches:
       - governance-pipeline-poc
 
+  pull_request:
+    branches:
+      - main
+
 jobs:
 
-  validate:
+  terraform-validation:
 
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: terraform/environments/dev
+
     steps:
 
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -28,9 +32,6 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: terraform/environments/dev
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: terraform/environments/dev
-
