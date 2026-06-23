@@ -51,7 +51,3 @@ variable "workload_ids" {
   type = set(string)
 }
 
-variable "labels" {
-  type    = map(string)
-  default = {}
-}

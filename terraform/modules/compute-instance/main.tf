@@ -22,7 +22,7 @@ resource "google_compute_instance" "this" {
   machine_type = var.machine_type
   zone         = var.zone
 
-  labels = var.labels
+  labels = local.mandatory_labels
 
 boot_disk {
 
