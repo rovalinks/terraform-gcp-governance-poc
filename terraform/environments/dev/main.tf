@@ -255,7 +255,6 @@ resource "google_bigquery_dataset" "governance_inventory1" {
     environment = var.environment
     owner        = var.owner
     application  = var.application
-    labels = local.mandatory_labels
   }
 
   
