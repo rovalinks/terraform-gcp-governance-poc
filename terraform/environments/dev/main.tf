@@ -259,3 +259,20 @@ resource "google_bigquery_dataset" "governance_inventory2" {
   location   = var.region
 }
 
+
+
+resource "google_compute_instance" "legacy-vm1" {
+  name         = "legacy-vm"
+  machine_type = "e2-medium"
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+
+  network_interface {
+    network = "default"
+    access_config {}
+  }
+}
