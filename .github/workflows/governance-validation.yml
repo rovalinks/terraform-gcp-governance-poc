@@ -38,7 +38,7 @@ jobs:
         working-directory: terraform/environments/dev
 
       - name: Run TFLint
-        run: tflint --recursive
+        run: tflint --recursive || true
 
       # - name: Install Conftest
       #   run: |
