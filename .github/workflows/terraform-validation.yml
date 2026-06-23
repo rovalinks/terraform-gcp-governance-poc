@@ -1,36 +1,61 @@
 name: Terraform Validation
 
 on:
-  pull_request:
-    branches:
-      - main
+pull_request:
+branches:
+- main
 
-  push:
-    branches:
-      - governance-pipeline-poc
+push:
+branches:
+- governance-pipeline-poc
 
 jobs:
 
-  validate:
+validate:
 
-    runs-on: ubuntu-latest
+```
+runs-on: ubuntu-latest
 
-    steps:
+steps:
 
-      - name: Checkout Code
-        uses: actions/checkout@v4
+  - name: Checkout Code
+    uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+  - name: Setup Terraform
+    uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
+  - name: Setup TFLint
+    uses: terraform-linters/setup-tflint@v4
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: terraform/environments/dev
+  - name: Terraform Format Check
+    run: terraform fmt -check -recursive
 
-      - name: Terraform Validate
-        run: terraform validate
-        working-directory: terraform/environments/dev
+  - name: Terraform Init
+    working-directory: terraform/environments/dev
+    run: terraform init
 
+  - name: Terraform Validate
+    working-directory: terraform/environments/dev
+    run: terraform validate
+
+  - name: Run TFLint
+    run: tflint --recursive
+
+  - name: Install Conftest
+    run: |
+      wget https://github.com/open-policy-agent/conftest/releases/latest/download/conftest_Linux_x86_64.tar.gz
+      tar xzf conftest_Linux_x86_64.tar.gz
+      sudo mv conftest /usr/local/bin/
+
+  - name: Generate Terraform Plan
+    working-directory: terraform/environments/dev
+    run: |
+      terraform plan -out=tfplan.binary
+      terraform show -json tfplan.binary > tfplan.json
+
+  - name: Run Governance Policies
+    working-directory: terraform/environments/dev
+    run: |
+      conftest test tfplan.json \
+        --policy ../../../policy
+```
