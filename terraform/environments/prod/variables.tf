@@ -65,3 +65,12 @@ variable "region" {
 variable "zone" {
   type = string
 }
+
+variable "__ADMIN_EMAIL__" {
+  type = string
+}
+
+variable "governance_labels" {
+  description = "Mandatory governance labels"
+  type        = map(string)
+}
