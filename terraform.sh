@@ -2,7 +2,7 @@
 # wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 #   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 #   sudo apt update && sudo apt install terraform
-#   bash
+
 
 #!/bin/bash
 
@@ -48,23 +48,34 @@ if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
     
     echo -e "\n--- Post-Plan Execution Tasks ---"
     
-    # Generate Environment Configs
+    # ---------------------------------------------------------
+    # TASK A: Generate Environment Configs
+    # ---------------------------------------------------------
     echo "Generating customer configurations..."
     CONFIG_FILE="config/customer.auto.tfvars"
     mkdir -p "terraform/environments/$ENV"
     cp "$CONFIG_FILE" "terraform/environments/$ENV/customer.auto.tfvars"
     echo -e "Customer configuration copied successfully.\n"
 
-    # Generate Deny Policies
-    echo "Generating IAM Deny policies..."
+
+    # ---------------------------------------------------------
+    # EXTRA STEP: Source Environment Variables Safely
+    # ---------------------------------------------------------
+    # Step into scripts directory so config.sh can read customer.auto.tfvars via relative pathing
     if [ -f "./scripts/config.sh" ]; then
         pushd scripts > /dev/null
         source ./config.sh
         popd > /dev/null
     else
-        echo "Warning: ./scripts/config.sh not found. Skipping Deny policy generation."
+        echo "Error: ./scripts/config.sh not found. Cannot generate policies."
+        exit 1
     fi
 
+
+    # ---------------------------------------------------------
+    # TASK B: Generate IAM Deny Policies
+    # ---------------------------------------------------------
+    echo "Generating IAM Deny policies..."
     mkdir -p iam-deny/generated
     for f in iam-deny/templates/*.yaml
     do
@@ -75,10 +86,45 @@ if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
     done
     echo -e "IAM Deny policies generated successfully.\n"
 
+
+    # ---------------------------------------------------------
+    # TASK C: Generate Org Policies
+    # ---------------------------------------------------------
+    echo "Generating Organisation policies..."
+    mkdir -p org-policies/generated/custom-constraints
+    mkdir -p org-policies/generated/policies
+
+    # Process template files
+    if [ -d "org-policies/templates" ]; then
+        find org-policies/templates -name "*.yaml" | while read -r file; do
+          filename=$(basename "$file")
+
+          # Logic: Route based on filename
+          if [[ "$filename" == *"label.yaml" ]]; then
+            target="org-policies/generated/custom-constraints/$filename"
+          else
+            target="org-policies/generated/policies/$filename"
+          fi
+
+          # Apply template substitutions
+          sed \
+            -e "s/__ORG_ID__/${ORGANIZATION_ID}/g" \
+            -e "s/__ENVIRONMENT_REGEX__/${ENVIRONMENT_REGEX}/g" \
+            -e "s/__OWNER_REGEX__/${OWNER_REGEX}/g" \
+            -e "s/__APPLICATION_REGEX__/${APPLICATION_REGEX}/g" \
+            "$file" > "$target"
+        done
+
+        echo "Organisation policies generated successfully."
+        echo "Environment Regex : ${ENVIRONMENT_REGEX}"
+        echo "Owner Regex       : ${OWNER_REGEX}"
+        echo "Application Regex : ${APPLICATION_REGEX}"
+        echo ""
+    else
+        echo "Warning: org-policies/templates directory not found. Skipping Org policy generation."
+    fi
+
 fi
 
 # Exit with the original Terraform exit code
 exit $TF_EXIT_CODE
-
-
-
