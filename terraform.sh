@@ -3,7 +3,6 @@
 #   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 #   sudo apt update && sudo apt install terraform
 #   bash
-#!/bin/bash
 
 #!/bin/bash
 
@@ -39,15 +38,15 @@ terraform "$@"
 # Store the exit code of the terraform command
 TF_EXIT_CODE=$?
 
-# Return to the root repository folder to run the generation scripts
+# Return to the root repository folder
 cd - > /dev/null
 
 
-# --- 2. GENERATE CONFIGS & POLICIES (RUNS AFTER TERRAFORM) ---
-# Only run generation if Terraform succeeded or if it was an 'apply'
-if [ $TF_EXIT_CODE -eq 0 ]; then
+# --- 2. CONDITIONALLY GENERATE (ONLY ON 'PLAN') ---
+# Check if the first argument passed to the script was exactly "plan"
+if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
     
-    echo -e "\n--- Post-Terraform Execution Tasks ---"
+    echo -e "\n--- Post-Plan Execution Tasks ---"
     
     # Generate Environment Configs
     echo "Generating customer configurations..."
@@ -73,10 +72,13 @@ if [ $TF_EXIT_CODE -eq 0 ]; then
         sed "s/__ADMIN_EMAIL__/${GOVERNANCE_ADMIN_EMAIL}/g" \
             "$f" \
             > "iam-deny/generated/$(basename "$f")"
-done
+    done
     echo -e "IAM Deny policies generated successfully.\n"
 
 fi
 
 # Exit with the original Terraform exit code
 exit $TF_EXIT_CODE
+
+
+
