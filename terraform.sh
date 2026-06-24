@@ -5,44 +5,9 @@
 #   bash
 #!/bin/bash
 
-# --- 1. GENERATE ENVIRONMENT CONFIGS ---
-echo "Generating customer configurations..."
-CONFIG_FILE="config/customer.auto.tfvars"
+#!/bin/bash
 
-for ENV in dev test uat prod
-do
-    # Ensure target directory exists before copying
-    mkdir -p "terraform/environments/$ENV"
-    cp "$CONFIG_FILE" "terraform/environments/$ENV/customer.auto.tfvars"
-done
-
-echo -e "Customer configuration copied successfully.\n"
-
-
-# --- 2. GENERATE DENY POLICIES ---
-echo "Generating IAM Deny policies..."
-# Source your governance config variables
-if [ -f "./scripts/config.sh" ]; then
-    source ./scripts/config.sh
-else
-    echo "Warning: ./scripts/config.sh not found. Skipping Deny policy generation."
-fi
-
-mkdir -p iam-deny/generated
-
-for f in iam-deny/templates/*.yaml
-do
-    # Check if templates actually exist to avoid errors
-    [ -e "$f" ] || continue
-    sed "s/__ADMIN_EMAIL__/${GOVERNANCE_ADMIN_EMAIL}/g" \
-        "$f" \
-        > "iam-deny/generated/$(basename "$f")"
-done
-
-echo -e "IAM Deny policies generated successfully.\n"
-
-
-# --- 3. ENVIRONMENT SELECTOR & EXECUTION ---
+# --- 1. ENVIRONMENT SELECTOR & EXECUTION ---
 echo "Select Environment:"
 echo "1) dev"
 echo "2) test"
@@ -52,16 +17,10 @@ echo "4) prod"
 read -p "Enter choice [1-4]: " choice
 
 case $choice in
-    1)
-        ENV="dev"
-        ;;
-    2)
-        ENV="test"
-        ;;
-    3)  ENV="uat"
-        ;;
-    4)  ENV="prod"
-        ;;
+    1)  ENV="dev" ;;
+    2)  ENV="test" ;;
+    3)  ENV="uat" ;;
+    4)  ENV="prod" ;;
     *)
         echo -e "\nEnvironment must be one of: dev, test, uat, prod. \n\nPlease select valid environment to proceed further\n"
         exit 1
@@ -74,5 +33,50 @@ echo ""
 echo "Selected environment: $ENV"
 echo ""
 
-# Execute whatever argument you pass to terraform.sh (e.g., ./terraform.sh plan)
+# Execute the Terraform action (e.g., init, plan, apply)
 terraform "$@"
+
+# Store the exit code of the terraform command
+TF_EXIT_CODE=$?
+
+# Return to the root repository folder to run the generation scripts
+cd - > /dev/null
+
+
+# --- 2. GENERATE CONFIGS & POLICIES (RUNS AFTER TERRAFORM) ---
+# Only run generation if Terraform succeeded or if it was an 'apply'
+if [ $TF_EXIT_CODE -eq 0 ]; then
+    
+    echo -e "\n--- Post-Terraform Execution Tasks ---"
+    
+    # Generate Environment Configs
+    echo "Generating customer configurations..."
+    CONFIG_FILE="config/customer.auto.tfvars"
+    mkdir -p "terraform/environments/$ENV"
+    cp "$CONFIG_FILE" "terraform/environments/$ENV/customer.auto.tfvars"
+    echo -e "Customer configuration copied successfully.\n"
+
+    # Generate Deny Policies
+    echo "Generating IAM Deny policies..."
+    if [ -f "./scripts/config.sh" ]; then
+        pushd scripts > /dev/null
+        source ./config.sh
+        popd > /dev/null
+    else
+        echo "Warning: ./scripts/config.sh not found. Skipping Deny policy generation."
+    fi
+
+    mkdir -p iam-deny/generated
+    for f in iam-deny/templates/*.yaml
+    do
+        [ -e "$f" ] || continue
+        sed "s/__ADMIN_EMAIL__/${GOVERNANCE_ADMIN_EMAIL}/g" \
+            "$f" \
+            > "iam-deny/generated/$(basename "$f")"
+done
+    echo -e "IAM Deny policies generated successfully.\n"
+
+fi
+
+# Exit with the original Terraform exit code
+exit $TF_EXIT_CODE
