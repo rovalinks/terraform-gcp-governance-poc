@@ -3,10 +3,9 @@
 #   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
 #   sudo apt update && sudo apt install terraform
 
-
 #!/bin/bash
 
-# --- 1. ENVIRONMENT SELECTOR & EXECUTION ---
+# --- 1. ENVIRONMENT SELECTOR ---
 echo "Select Environment:"
 echo "1) dev"
 echo "2) test"
@@ -26,42 +25,20 @@ case $choice in
         ;;
 esac
 
-cd terraform/environments/$ENV || exit 1
 
-echo ""
-echo "Selected environment: $ENV"
-echo ""
-
-# Execute the Terraform action (e.g., init, plan, apply)
-terraform "$@"
-
-# Store the exit code of the terraform command
-TF_EXIT_CODE=$?
-
-# Return to the root repository folder
-cd - > /dev/null
-
-
-# --- 2. CONDITIONALLY GENERATE (ONLY ON 'PLAN') ---
-# Check if the first argument passed to the script was exactly "plan"
-if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
+# --- 2. GENERATE CONFIGS & POLICIES BEFORE TERRAFORM RUNS (ONLY ON 'PLAN') ---
+if [ "$1" = "plan" ]; then
     
-    echo -e "\n--- Post-Plan Execution Tasks ---"
+    echo -e "\n--- Pre-Plan Execution Tasks ---"
     
-    # ---------------------------------------------------------
     # TASK A: Generate Environment Configs
-    # ---------------------------------------------------------
     echo "Generating customer configurations..."
     CONFIG_FILE="config/customer.auto.tfvars"
     mkdir -p "terraform/environments/$ENV"
     cp "$CONFIG_FILE" "terraform/environments/$ENV/customer.auto.tfvars"
     echo -e "Customer configuration copied successfully.\n"
 
-
-    # ---------------------------------------------------------
     # EXTRA STEP: Source Environment Variables Safely
-    # ---------------------------------------------------------
-    # Step into scripts directory so config.sh can read customer.auto.tfvars via relative pathing
     if [ -f "./scripts/config.sh" ]; then
         pushd scripts > /dev/null
         source ./config.sh
@@ -71,10 +48,7 @@ if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
         exit 1
     fi
 
-
-    # ---------------------------------------------------------
     # TASK B: Generate IAM Deny Policies
-    # ---------------------------------------------------------
     echo "Generating IAM Deny policies..."
     mkdir -p iam-deny/generated
     for f in iam-deny/templates/*.yaml
@@ -86,27 +60,21 @@ if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
     done
     echo -e "IAM Deny policies generated successfully.\n"
 
-
-    # ---------------------------------------------------------
     # TASK C: Generate Org Policies
-    # ---------------------------------------------------------
     echo "Generating Organisation policies..."
     mkdir -p org-policies/generated/custom-constraints
     mkdir -p org-policies/generated/policies
 
-    # Process template files
     if [ -d "org-policies/templates" ]; then
         find org-policies/templates -name "*.yaml" | while read -r file; do
           filename=$(basename "$file")
 
-          # Logic: Route based on filename
           if [[ "$filename" == *"label.yaml" ]]; then
             target="org-policies/generated/custom-constraints/$filename"
           else
             target="org-policies/generated/policies/$filename"
           fi
 
-          # Apply template substitutions
           sed \
             -e "s/__ORG_ID__/${ORGANIZATION_ID}/g" \
             -e "s/__ENVIRONMENT_REGEX__/${ENVIRONMENT_REGEX}/g" \
@@ -123,8 +91,19 @@ if [ "$1" = "plan" ] && [ $TF_EXIT_CODE -eq 0 ]; then
     else
         echo "Warning: org-policies/templates directory not found. Skipping Org policy generation."
     fi
-
 fi
 
-# Exit with the original Terraform exit code
+
+# --- 3. EXECUTE TERRAFORM ---
+cd terraform/environments/$ENV || exit 1
+
+echo ""
+echo "Selected environment: $ENV"
+echo ""
+
+# Execute the Terraform action (e.g., plan)
+terraform "$@"
+
+# Store and exit with the final Terraform code
+TF_EXIT_CODE=$?
 exit $TF_EXIT_CODE
